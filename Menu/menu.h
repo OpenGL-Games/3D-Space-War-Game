@@ -6,20 +6,21 @@ class Menu {
 public:
 
     Menu();
-    void render();
-    static void keyboardWrapper(unsigned char key, int x, int y);
-    static void specialKeysWrapper(int key, int x, int y);
+    void draw();
+    void resize(int w, int h);
+    void setup(void);
+    void keyInput(unsigned char key, int x, int y);
+    void specialKeyInput(int key, int x, int y);
 
 private:
 
     int selectedOption;
-    static Menu* instance;
+    unsigned int texture[2];
 
     void drawText(int x, int y, const char* text, bool selected);
     void selectNext();
     void selectPrevious();
-    void executeOption();
-
+    void loadTextures();
 
 };
 #endif //TEXT_MENU_H
