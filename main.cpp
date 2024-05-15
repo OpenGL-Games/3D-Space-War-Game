@@ -44,7 +44,7 @@ void drawScene(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
-    glTranslatef(0.0, 0.0, -8);
+    glTranslatef(2.0, 0.0, -8);
 
     glBindTexture(GL_TEXTURE_2D, texture[0]);
 
@@ -105,6 +105,20 @@ void keyInput(unsigned char key, int x, int y)
     }
 }
 
+void setWindowIcon() {
+    // Load icon file
+    auto hIcon = (HICON)LoadImage(nullptr, "..//Images//icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+    if (hIcon == NULL) {
+        // Error loading icon
+        std::cerr << "Failed to load icon!" << std::endl;
+        return;
+    }
+    // Set window icon
+    HWND hWnd = FindWindow(NULL, "Space War"); // Replace "Space War" with your window title
+    SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+    SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+}
+
 // Main routine.
 int main(int argc, char **argv)
 {
@@ -117,6 +131,7 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(1000, 600);
     glutCreateWindow("Space War");
+    setWindowIcon();
 
     glutFullScreen();
 
