@@ -6,27 +6,20 @@ class Menu {
 public:
 
     Menu();
-
-    void draw();
-
-    void selectNext();
-
-    void selectPrevious();
-
-    void executeOption();
+    void render();
+    static void keyboardWrapper(unsigned char key, int x, int y);
+    static void specialKeysWrapper(int key, int x, int y);
 
 private:
-    enum MenuOption {
-        START_GAME,
-        MODES,
-        EXIT,
-        NUM_OPTIONS
-    };
 
     int selectedOption;
-
-
+    static Menu* instance;
 
     void drawText(int x, int y, const char* text, bool selected);
+    void selectNext();
+    void selectPrevious();
+    void executeOption();
+
+
 };
 #endif //TEXT_MENU_H
