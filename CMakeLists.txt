@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.26)
 project(Game)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -9,5 +9,7 @@ add_executable(Game
         Menu/menu.cpp
         Texture/getBMP.h
         Texture/getBMP.cpp
+        Game/game.cpp
+        Game/game.h
 )
 target_link_libraries(Game -lglew32 -lopengl32 -lfreeglut -lglu32 -lwinmm)
