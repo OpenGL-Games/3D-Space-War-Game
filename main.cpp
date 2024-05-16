@@ -85,14 +85,11 @@ int main(int argc, char **argv)
     glewInit();
 
     menu.setup();
-    game.setup();
 
     glutDisplayFunc(displayFunc);
     glutKeyboardFunc(keyboardFunc);
     glutReshapeFunc(resize);
     glutSpecialFunc(specialFunc);
-
-
 
     glutMainLoop();
 }

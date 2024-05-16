@@ -11,5 +11,7 @@ add_executable(Game
         Texture/getBMP.cpp
         Game/game.cpp
         Game/game.h
+        Planet/Planet.cpp
+        Planet/Planet.h
 )
 target_link_libraries(Game -lglew32 -lopengl32 -lfreeglut -lglu32 -lwinmm)

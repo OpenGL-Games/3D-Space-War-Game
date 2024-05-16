@@ -3,10 +3,12 @@
 #include <GL/freeglut.h>
 #include "menu.h"
 #include "../Texture/getBMP.h"
+#include "../Game/game.h"
 
 using namespace std;
 
 extern int windowChoice;
+extern Game game;
 
 Menu::Menu() : selectedOption(0){
 
@@ -93,7 +95,7 @@ void Menu::selectNext() {
 }
 
 void Menu::selectPrevious() {
-    selectedOption = (selectedOption - 1) % 3;
+    selectedOption = (3 + (selectedOption - 1) % 3) % 3;
     glutPostRedisplay();
 }
 
@@ -107,7 +109,6 @@ void Menu::resize(int w, int h)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
-
 
 // Initialization routine.
 void Menu::setup(void)
@@ -130,6 +131,7 @@ void Menu::keyInput(unsigned char key, int x, int y)
     if (key == 13) { // Enter key
         if(selectedOption == 0){
             windowChoice = 1;
+            game.setup();
         }else if (selectedOption == 2) {
             exit(0);
         }
