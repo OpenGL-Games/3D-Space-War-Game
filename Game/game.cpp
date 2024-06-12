@@ -214,7 +214,7 @@ void Game::drawPlanet(string planetName, unsigned int textureId,float radius, in
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    loadTextures("..//Images//Planets//" + planetName + ".bmp", textureId);
+    loadTextures("Images//Planets//" + planetName + ".bmp", textureId);
     // Map the texture onto the sphere.
     glBindTexture(GL_TEXTURE_2D, textureId);
     glPushMatrix();

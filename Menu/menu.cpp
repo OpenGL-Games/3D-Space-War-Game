@@ -51,7 +51,7 @@ void Menu::loadTextures()
     imageFile *image[1];
 
     // Load the image.
-    image[0] = getBMP("..//Images//background.bmp");
+    image[0] = getBMP("Images//background.bmp");
 
     // Create texture object texture[0].
     glBindTexture(GL_TEXTURE_2D, texture[0]);

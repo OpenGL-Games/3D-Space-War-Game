@@ -15,7 +15,7 @@ Game game;
 
 void setWindowIcon() {
     // Load icon file
-    auto hIcon = (HICON)LoadImage(nullptr, "..//Images//icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+    auto hIcon = (HICON)LoadImage(nullptr, "Images//icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
     if (hIcon == NULL) {
         // Error loading icon
         std::cerr << "Failed to load icon!" << std::endl;
