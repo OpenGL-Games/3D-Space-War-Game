@@ -1,4 +1,4 @@
-// Routine to read an uncompressed 24-bit unindexed color RGB BMP file into a 
+// Routine to read an uncompressed 24-bit unindexed color RGB BMP file into a
 // 32-bit color RGBA image file (alpha values all being set to 1).
 
 #include <fstream>
@@ -11,7 +11,7 @@ using namespace std;
 
 imageFile *getBMP(std::string fileName)
 {
-	int offset, // No. of bytes to start of image data in input BMP file. 
+	int offset, // No. of bytes to start of image data in input BMP file.
 		w, // Width in pixels of input BMP file.
 		h; // Height in pixels of input BMP file.
 
@@ -32,7 +32,7 @@ imageFile *getBMP(std::string fileName)
 	inFile.read((char *)&w, 4);
 	inFile.read((char *)&h, 4);
 
-	// Determine the length of padding of the pixel rows 
+	// Determine the length of padding of the pixel rows
 	// (each pixel row of a BMP file is 4-byte aligned by padding with zero bytes).
 	int padding = (3 * w) % 4 ? 4 - (3 * w) % 4 : 0;
 

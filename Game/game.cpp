@@ -41,7 +41,7 @@ void coodrinateSystem() {
 Game::Game() = default;
 
 void Game::animate(int value = 0) {
-    angle += 0.01;
+    angle += 0.5;
     if(angle > 360) angle = 0;
     glutPostRedisplay();
     glutTimerFunc(animationPeriod, animate, value);
@@ -78,7 +78,6 @@ void Game::draw() {
     // draw asteroids
     asteriods->draw();
 
-    animate();
     glutSwapBuffers();
 }
 
@@ -106,12 +105,14 @@ void Game::setup(void) {
     planets = new Planet[9];
     for (int i = 0; i < 9; i++) {
         planets[i].textureID = texture[i];
-        planets[i].setup();
         planets[i].planetName = planetNames[i];
+        planets[i].setup();
     }
 
     // Asteroids Setup
     asteriods = new Asteriods();
+
+    animate();
 
 
     // Space Craft Setup

@@ -11,20 +11,34 @@
 
 using namespace std;
 
-void loadTextures(string file, unsigned int t) {
-    imageFile *image[1];
-    image[0] = getBMP(file.c_str());
+void loadTextures(std::string file, unsigned int t) {
+    imageFile* image = getBMP(file.c_str());
+
+    if (!image) {
+        std::cerr << "Failed to load image: " << file << std::endl;
+        return;
+    }
 
     glBindTexture(GL_TEXTURE_2D, t);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[0]->width, image[0]->height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, image[0]->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, image->data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // Free the image memory
+    delete[] image->data;
+    delete image;
 }
 
+
 Planet::Planet() = default;
+
+void Planet::initTexture() {
+    loadTextures("..//Images//Planets//11zon_compressed//" + planetName + ".bmp", textureID);
+}
+
 
 void Planet::setup(void) {
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -34,6 +48,9 @@ void Planet::setup(void) {
     vertices = new float[3 * (p + 1)*(q + 1)];
     textureCoordinates = new float[2 * (p + 1)*(q + 1)];
 
+    vertices = new float[3 * (p + 1) * (q + 1)];
+    textureCoordinates = new float[2 * (p + 1) * (q + 1)];
+
     // Set the array pointers.
     glVertexPointer(3, GL_FLOAT, 0, vertices);
     glTexCoordPointer(2, GL_FLOAT, 0, textureCoordinates);
@@ -42,7 +59,10 @@ void Planet::setup(void) {
     fillVertexArray();
     fillTextureCoordArray();
 
+    // Initialize texture
+    initTexture();
 }
+
 
 void Planet::fillVertexArray(void) {
     int i, j, k;
@@ -89,7 +109,6 @@ void Planet::draw() {
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    loadTextures("..//Images//Planets//" + planetName + ".bmp", textureID);
 
     // Set material properties
     GLfloat mat_ambient[] = {0.2, 0.2, 0.2, 1.0};

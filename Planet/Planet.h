@@ -64,6 +64,7 @@ private:
 
     float h(int i, int j);
 
+    void initTexture();
 };
 
 #endif //GAME_PLANET_H
