@@ -6,6 +6,9 @@
 #define GAME_GAME_H
 #include <GL/freeglut.h>
 #include <string>
+#include <vector>
+
+using namespace std;
 
 class Game {
 public:
@@ -14,7 +17,7 @@ public:
 
     void draw();
 
-    void resize(int w, int h);
+    void static resize(int w, int h);
 
     void setup(void);
 
@@ -22,27 +25,16 @@ public:
 
     void specialKeyInput(int key, int x, int y);
 
+    vector<string> planetNames = {"sun", "mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune", "moon"};
+
 private:
-    float *vertices = NULL;
-    float *textureCoordinates = NULL;
+
+    static const int animationPeriod = 100;
     unsigned int texture[12];
-    int p = 200; // Number of grid columns.
-    int q = 200; // Number of grid rows
-    int R = 10;
 
-    void fillVertexArray(void);
+    void static animate(int value);
 
-    void fillTextureCoordArray(void);
-
-    float f(int i, int j);
-
-    float g(int i, int j);
-
-    float h(int i, int j);
-
-    void loadTextures(std::string file, unsigned int t);
-
-    void drawPlanet(std::string planetName, unsigned int textureId);
+    static void drawPlanets();
 };
 
 

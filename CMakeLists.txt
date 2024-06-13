@@ -13,5 +13,8 @@ add_executable(Game
         Game/game.h
         Planet/Planet.cpp
         Planet/Planet.h
+        Asteriods/Asteriods.cpp
+        Asteriods/Asteriods.h
+        Asteriods/Asteriods.h
 )
 target_link_libraries(Game -lglew32 -lopengl32 -lfreeglut -lglu32 -lwinmm)

@@ -13,27 +13,8 @@ int windowChoice = 0;
 Menu menu;
 Game game;
 
-void setWindowIcon() {
-    // Load icon file
-    auto hIcon = (HICON)LoadImage(nullptr, "..//Images//icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
-    if (hIcon == NULL) {
-        // Error loading icon
-        std::cerr << "Failed to load icon!" << std::endl;
-        return;
-    }
-    // Set window icon
-    HWND hWnd = FindWindow(NULL, "Space War"); // Replace "Space War" with your window title
-    SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-    SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-}
-
-void loadSound() {
-    PlaySound("..//Sounds//game.wav", NULL, SND_ASYNC);
-}
-
 // Display function
 void displayFunc() {
-    cout << windowChoice << endl;
     if(windowChoice == 0)
         menu.draw();
     else if(windowChoice == 1)
@@ -65,17 +46,35 @@ void resize(int w, int h)
         game.resize(w, h);
 }
 
+void setWindowIcon() {
+    // Load icon file
+    auto hIcon = (HICON)LoadImage(nullptr, "..//Images//icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+    if (hIcon == nullptr) {
+        // Error loading icon
+        std::cerr << "Failed to load icon!" << std::endl;
+        return;
+    }
+    // Set window icon
+    HWND hWnd = FindWindow(NULL, "Space War"); // Replace "Space War" with your window title
+    SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+    SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+}
+
+void loadBackGroundSound() {
+    PlaySound("..//Sounds//game.wav", nullptr, SND_ASYNC);
+}
+
 // Main routine.
 int main(int argc, char **argv)
 {
-    loadSound();
+    loadBackGroundSound();
     glutInit(&argc, argv);
 
     glutInitContextVersion(4, 3);
     glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
 
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(1000, 600);
+    glutInitWindowSize(1000, 1000);
     glutCreateWindow("Space War");
     setWindowIcon();
 

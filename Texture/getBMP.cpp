@@ -2,7 +2,11 @@
 // 32-bit color RGBA image file (alpha values all being set to 1).
 
 #include <fstream>
+#include <iostream>
+#include <string>
+#include <GL/glew.h>
 
+using namespace std;
 #include "getBMP.h"
 
 imageFile *getBMP(std::string fileName)

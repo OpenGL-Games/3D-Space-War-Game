@@ -1,6 +1,8 @@
 #ifndef GETBMP_H
 #define GETBMP_H
 
+#include <string>
+
 struct imageFile
 {
 	int width;
