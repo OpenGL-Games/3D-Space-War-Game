@@ -28,7 +28,7 @@ void setWindowIcon() {
 }
 
 void loadSound() {
-    PlaySound("..//Sounds//game.wav", NULL, SND_ASYNC);
+//    PlaySound("..//Sounds//game.wav", NULL, SND_ASYNC);
 }
 
 // Display function
