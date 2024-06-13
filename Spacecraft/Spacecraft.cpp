@@ -36,12 +36,13 @@ void loadTextures(string file, unsigned int t) {
 }
 
 void Spacecraft::draw() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
     if(enemy) {
-        loadTextures("..//Images//enemy.bmp", texture[1]);
+//        loadTextures("..//Images//enemy.bmp", texture[1]);
         // Map the texture onto the sphere.
         glBindTexture(GL_TEXTURE_2D, texture[1]);
 
@@ -61,7 +62,7 @@ void Spacecraft::draw() {
         glEnd();
     }
     else {
-        loadTextures("..//Images//spacecraft.bmp", texture[0]);
+//        loadTextures("..//Images//spacecraft.bmp", texture[0]);
         // Map the texture onto the sphere.
         glBindTexture(GL_TEXTURE_2D, texture[0]);
 
@@ -176,6 +177,15 @@ void Spacecraft::setup() {
     // Cull the back faces of the cone
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+
+    // Enable the depth test
+    glEnable(GL_DEPTH_TEST);
+
+    if (enemy) {
+        loadTextures("..//Images//enemy.bmp", texture[1]);
+    } else {
+        loadTextures("..//Images//spacecraft.bmp", texture[0]);
+    }
 }
 
 

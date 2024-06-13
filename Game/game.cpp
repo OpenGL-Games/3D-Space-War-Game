@@ -21,7 +21,7 @@ float craftAngle = 0;
 Game::Game() = default;
 
 void Game::animate(int value = 0) {
-    angle += 1.1;
+    angle += 0.5;
     if(angle > 360) angle = 0;
     glutPostRedisplay();
     glutTimerFunc(animationPeriod, animate, value);
@@ -52,8 +52,8 @@ void Game::draw() {
     planets = new Planet[9];
     for (int i = 0; i < 9; i++) {
         planets[i].textureID = texture[i];
-        planets[i].setup();
         planets[i].planetName = planetNames[i];
+        planets[i].setup();
     }
     Planet::drawPlanets(planets, angle);
 
@@ -91,6 +91,7 @@ void Game::setup(void) {
     spaceCraft = new Spacecraft(texture[9], texture[10]);
 
     animate();
+    glEnable(GL_DEPTH_TEST);
 }
 
 // handle ESC and Shoot

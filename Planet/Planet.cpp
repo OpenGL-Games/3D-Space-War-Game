@@ -12,16 +12,19 @@
 using namespace std;
 
 void Planet::loadTextures(string file, unsigned int t) {
-    imageFile *image[1];
-    image[0] = getBMP(file.c_str());
+    imageFile *image = getBMP(file.c_str());
 
     glBindTexture(GL_TEXTURE_2D, t);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[0]->width, image[0]->height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, image[0]->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, image->data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // Free the image memory
+    delete[] image->data;
+    delete image;
 }
 
 Planet::Planet() = default;
@@ -31,8 +34,8 @@ void Planet::setup(void) {
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-    vertices = new float[3 * (p + 1)*(q + 1)];
-    textureCoordinates = new float[2 * (p + 1)*(q + 1)];
+    vertices = new float[3 * (p + 1) * (q + 1)];
+    textureCoordinates = new float[2 * (p + 1) * (q + 1)];
 
     // Set the array pointers.
     glVertexPointer(3, GL_FLOAT, 0, vertices);
@@ -42,6 +45,11 @@ void Planet::setup(void) {
     fillVertexArray();
     fillTextureCoordArray();
 
+    // Enable the depth test.
+    glEnable(GL_DEPTH_TEST);
+
+    // load textures
+    loadTextures("..//Images//Planets//11zon_compressed//" + planetName + ".bmp", textureID);
 }
 
 void Planet::fillVertexArray(void) {
@@ -65,23 +73,22 @@ void Planet::fillTextureCoordArray(void) {
 
     k = 0;
     for (j = 0; j <= q; j++)
-        for (i = 0; i <= p; i++)
-        {
-            textureCoordinates[k++] = (float)i / p;
-            textureCoordinates[k++] = (float)j / q;
+        for (i = 0; i <= p; i++) {
+            textureCoordinates[k++] = (float) i / p;
+            textureCoordinates[k++] = (float) j / q;
         }
 }
 
 float Planet::f(int i, int j) {
-    return (R * cos(-M_PI / 2.0 + (float)j / q * M_PI) * cos(2.0 * (float)i / p * M_PI));
+    return (R * cos(-M_PI / 2.0 + (float) j / q * M_PI) * cos(2.0 * (float) i / p * M_PI));
 }
 
 float Planet::g(int i, int j) {
-    return (R * sin(-M_PI / 2.0 + (float)j / q * M_PI));
+    return (R * sin(-M_PI / 2.0 + (float) j / q * M_PI));
 }
 
 float Planet::h(int i, int j) {
-    return (-R * cos(-M_PI / 2.0 + (float)j / q * M_PI) * sin(2.0 * (float)i / p * M_PI));
+    return (-R * cos(-M_PI / 2.0 + (float) j / q * M_PI) * sin(2.0 * (float) i / p * M_PI));
 }
 
 void Planet::draw() {
@@ -89,7 +96,7 @@ void Planet::draw() {
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    loadTextures("..//Images//Planets//" + planetName + ".bmp", textureID);
+//    loadTextures("..//Images//Planets//" + planetName + ".bmp", textureID);
 
     // Set material properties
     GLfloat mat_ambient[] = {0.2, 0.2, 0.2, 1.0};
@@ -106,13 +113,11 @@ void Planet::draw() {
     glBindTexture(GL_TEXTURE_2D, textureID);
     glPushMatrix();
 
-    for (int j = 0; j < q; j++)
-    {
+    for (int j = 0; j < q; j++) {
         glBegin(GL_TRIANGLE_STRIP);
-        for (int i = 0; i <= p; i++)
-        {
-            glArrayElement((j + 1)*(p + 1) + i);
-            glArrayElement(j*(p + 1) + i);
+        for (int i = 0; i <= p; i++) {
+            glArrayElement((j + 1) * (p + 1) + i);
+            glArrayElement(j * (p + 1) + i);
         }
         glEnd();
     }
