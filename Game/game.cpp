@@ -5,6 +5,7 @@
 #include <cmath>
 #include "../Planet/Planet.h"
 #include "../Asteriods/Asteriods.h"
+#include "../SpaceCraft/SpaceCraft.h"
 #include <vector>
 
 using namespace std;
@@ -13,35 +14,14 @@ using namespace std;
 float aspectRatio; // Aspect ratio of the window
 Planet *planets = nullptr;
 Asteriods *asteriods = nullptr;
+Spacecraft *spaceCraft = nullptr;
 float angle = 0;
-
-void coodrinateSystem() {
-    // draw point at origin
-    glPointSize(1.0);
-    glLineWidth(1.0);
-    glBegin(GL_POINTS);
-    glColor3f(1.0, 0, 0);
-    glVertex3f(0.0, 0.0, 0.0);
-    glEnd();
-
-    // draw coordinate system
-    glBegin(GL_LINES);
-    glColor3f(1.0, 0.0, 0.0);
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(40.0, 0.0, 0.0);
-    glColor3f(0.0, 1.0, 0.0);
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(0.0, 40.0, 0.0);
-    glColor3f(0.0, 0.0, 1.0);
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(0.0, 0.0, 20.0);
-    glEnd();
-}
+float craftAngle = 0;
 
 Game::Game() = default;
 
 void Game::animate(int value = 0) {
-    angle += 0.5;
+    angle += 1.1;
     if(angle > 360) angle = 0;
     glutPostRedisplay();
     glutTimerFunc(animationPeriod, animate, value);
@@ -58,22 +38,24 @@ void Game::draw() {
     glTranslatef(0.0, 0.0, -6);
     glScalef(1.0, 1.0 * aspectRatio, 1.0);
 
-    // draw coordinate system for reference
-    // coodrinateSystem();
+    // Space Craft Setup and draw
+    spaceCraft->setEnemy(false);
+    spaceCraft->setup();
 
-    // draw point
-    glPointSize(5.0);
-    glBegin(GL_POINTS);
-    glColor3f(1.0, 1.0, 1.0);
-    glVertex3f(0.0, 0.0, -20.0);
-    glEnd();
+    glPushMatrix();
+        glTranslatef(spaceCraft->getX(), 0.0, spaceCraft->getZ());
+        glRotatef(spaceCraft->getAngle(), 0.0, 1.0, 0.0);
+        spaceCraft->draw();
+    glPopMatrix();
 
-
-    // draw planets
+    // planets setup and draw
+    planets = new Planet[9];
+    for (int i = 0; i < 9; i++) {
+        planets[i].textureID = texture[i];
+        planets[i].setup();
+        planets[i].planetName = planetNames[i];
+    }
     Planet::drawPlanets(planets, angle);
-
-    // draw spacecraft
-
 
     // draw asteroids
     asteriods->draw();
@@ -91,7 +73,6 @@ void Game::resize(int w, int h) {
 
 void Game::setup(void) {
     glEnable(GL_DEPTH_TEST);
-    cout << "Setup" << endl;
     // background color
     glClearColor(0.0352941f, 0.0431373f, 0.0705882f, 0.0);
 
@@ -100,23 +81,16 @@ void Game::setup(void) {
     int screenHeight = glutGet(GLUT_WINDOW_HEIGHT);
     aspectRatio = (float)screenWidth / (float)screenHeight;
 
-    // Planets Setup
-    glGenTextures(9, texture);
-    planets = new Planet[9];
-    for (int i = 0; i < 9; i++) {
-        planets[i].textureID = texture[i];
-        planets[i].planetName = planetNames[i];
-        planets[i].setup();
-    }
+    // Load textures
+    glGenTextures(12, texture);
 
-    // Asteroids Setup
+    // Asteroids instance
     asteriods = new Asteriods();
 
+    // spacecraft instance
+    spaceCraft = new Spacecraft(texture[9], texture[10]);
+
     animate();
-
-
-    // Space Craft Setup
-
 }
 
 // handle ESC and Shoot
@@ -128,7 +102,7 @@ void Game::keyInput(unsigned char key, int x, int y) {
             exit(0);
             break;
         // Shoot
-        case ' ':
+        case 32:
         {
             // shoot logic
             cout << "Shoot" << endl;
@@ -142,19 +116,32 @@ void Game::keyInput(unsigned char key, int x, int y) {
 // handle arrow keys
 void Game::specialKeyInput(int key, int x, int y) {
 
+
+    float tempxVal = spaceCraft->getX(), tempzVal = spaceCraft->getZ(), tempAngle = spaceCraft->getAngle();
+
     // Compute next position.
-    if (key == GLUT_KEY_LEFT) {
-        cout << "Left" << endl;
+    if (key == GLUT_KEY_RIGHT) tempAngle = craftAngle + 5.0;
+    if (key == GLUT_KEY_LEFT) tempAngle = craftAngle - 5.0;
+    if (key == GLUT_KEY_DOWN)
+    {
+        tempxVal = spaceCraft->getX() - sin(craftAngle * M_PI / 180.0);
+        tempzVal = spaceCraft->getZ() - cos(craftAngle * M_PI / 180.0);
     }
-    if (key == GLUT_KEY_RIGHT) {
-        cout << "Right" << endl;
+    if (key == GLUT_KEY_UP)
+    {
+        tempxVal = spaceCraft->getX() + sin(craftAngle * M_PI / 180.0);
+        tempzVal = spaceCraft->getZ() + cos(craftAngle * M_PI / 180.0);
     }
-    if (key == GLUT_KEY_UP) {
-        cout << "Up" << endl;
-    }
-    if (key == GLUT_KEY_DOWN) {
-        cout << "Down" << endl;
-    }
+
+    // Angle correction.
+    if (tempAngle > 360.0) tempAngle -= 360.0;
+    if (tempAngle < 0.0) tempAngle += 360.0;
+
+    spaceCraft->setX(tempxVal);
+    spaceCraft->setZ(tempzVal);
+    spaceCraft->setAngle(tempAngle);
+
+    craftAngle = tempAngle;
 
     glutPostRedisplay();
 }

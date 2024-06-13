@@ -12,24 +12,16 @@
 using namespace std;
 
 void Planet::loadTextures(string file, unsigned int t) {
-    imageFile* image = getBMP(file.c_str());
-
-    if (!image) {
-        std::cerr << "Failed to load image: " << file << std::endl;
-        return;
-    }
+    imageFile *image[1];
+    image[0] = getBMP(file.c_str());
 
     glBindTexture(GL_TEXTURE_2D, t);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, image->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[0]->width, image[0]->height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, image[0]->data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    // Free the image memory
-    delete[] image->data;
-    delete image;
 }
 
 Planet::Planet() = default;
@@ -49,8 +41,6 @@ void Planet::setup(void) {
     // Fill the vertex and texture co-ordinates arrays.
     fillVertexArray();
     fillTextureCoordArray();
-
-    initTexture();
 
 }
 
@@ -99,6 +89,7 @@ void Planet::draw() {
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+    loadTextures("..//Images//Planets//" + planetName + ".bmp", textureID);
 
     // Set material properties
     GLfloat mat_ambient[] = {0.2, 0.2, 0.2, 1.0};
@@ -161,10 +152,6 @@ void Planet::drawPlanets(Planet *planets, float angle) {
 
     glPopMatrix();
 
-}
-
-void Planet::initTexture() {
-    loadTextures("..//Images//Planets//11zon_compressed//" + planetName + ".bmp", textureID);
 }
 
 
