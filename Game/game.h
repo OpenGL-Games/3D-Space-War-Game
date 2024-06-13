@@ -42,7 +42,7 @@ private:
 
     void loadTextures(std::string file, unsigned int t);
 
-    void drawPlanet(std::string textureFile, unsigned int textureId, float radius, int offest);
+    void drawPlanet(std::string planetName, unsigned int textureId);
 };
 
 

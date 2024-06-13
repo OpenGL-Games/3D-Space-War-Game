@@ -7,6 +7,7 @@
 #include <cmath>
 #include "game.h"
 #include "../Texture/getBMP.h"
+#include <map>
 
 using namespace std;
 
@@ -16,9 +17,38 @@ float aspectRatio;
 static float latAngle = 0.0; // Latitudinal angle.
 static float longAngle = 0.0; // Longitudinal angle.
 static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0; // Angles to rotate scene.
-static int isAnimate = 1; // Animated?
-static int animationPeriod = 0.5; // Time interval between frames.
+static int animationPeriod = 1; // Time interval between frames.
 double previousTime = 0.0;
+// Define global variables for zoom control
+static float zoomFactor = 1.0f; // Initial zoom factor
+static float zoomStep = 0.1f;   // Zoom step increment
+
+
+std::map<std::string, float> planetScales = {
+        {"sun", 1392700.0 * 0.05 / 12742.0},
+        {"mercury", 4880.0 / 12742.0},
+        {"venus", 12104.0 / 12742.0},
+        {"earth", 1.0f}, // Baseline
+        {"mars", 6779.0 / 12742.0},
+        {"jupiter", 139820.0 / 12742.0},
+        {"saturn", 116460.0 / 12742.0},
+        {"uranus", 50724.0 / 12742.0},
+        {"neptune", 49244.0 / 12742.0},
+        {"moon", 3474.0 / 12742.0}
+};
+
+std::map<std::string, float> planetDistances = {
+        {"sun", 0.0f},
+        {"mercury", 57.9 * 5 / 100.0},
+        {"venus", 108.2 * 5 / 100.0},
+        {"earth", 149.6 * 5 / 100.0},
+        {"mars", 227.9 * 5 / 100.0},
+        {"jupiter", 778.5 * 5 / 100.0},
+        {"saturn", 1427.0 * 5 / 100.0},
+        {"uranus", 2871.0 * 5 / 100.0},
+        {"neptune", 4497.1 * 5 / 100.0},
+        {"moon", (149.6 + 0.384) * 5 / 100.0} // Distance from the Sun via Earth
+};
 
 Game::Game() = default;
 
@@ -88,24 +118,19 @@ void Game::fillTextureCoordArray(void)
 //    glEnd();
 //}
 
-void animate(int value) {
-    if (isAnimate) {
-        double currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0; // Get current time in seconds
-        double deltaTime = currentTime - previousTime;
-        previousTime = currentTime;
+// Timer function.
+void animate(int value)
+{
+//    if (isAnimate)
+//    {
+    latAngle += 6.0;
+    if (latAngle > 360.0) latAngle -= 360.0;
+    longAngle += 1.0;
+    if (longAngle > 360.0) longAngle -= 360.0;
 
-        // Update angles based on elapsed time
-        latAngle += 50.0 * deltaTime; // Adjust these multipliers as needed
-        if (latAngle > 360.0) latAngle -= 360.0;
-        longAngle += 10.0 * deltaTime; // Adjust these multipliers as needed
-        if (longAngle > 360.0) longAngle -= 360.0;
-        Yangle += 0.0001; // Adjust these multipliers as needed
-
-        // Request a redraw
-        glutPostRedisplay();
-        // Register the timer function again
-        glutTimerFunc(animationPeriod, animate, 1);
-    }
+    glutPostRedisplay();
+    glutTimerFunc(animationPeriod, animate, 1);
+//    }
 }
 
 void Game::draw(){
@@ -115,36 +140,49 @@ void Game::draw(){
     int screenHeight = glutGet(GLUT_WINDOW_HEIGHT);
     aspectRatio = (float)screenWidth / (float)screenHeight;
     glLoadIdentity();
+    glTranslatef(/*planetDistances[planetName]*/ 0, 0, -25);
 
-    drawPlanet("sun", texture[0], 0.2, 0);
 
-    // Rotate scene.
-    glRotatef(Zangle, 0.0, 0.0, 1.0);
-    glRotatef(Yangle, 0.0, 1.0, 0.0);
-    glRotatef(Xangle, 1.0, 0.0, 0.0);
+    // Fixed sun
 
-    drawPlanet("mercury", texture[1], 0.2, -9);
-    drawPlanet("venus", texture[2], 0.2, -4);
-    drawPlanet("earth", texture[3], 0.2, 1);
-    drawPlanet("mars", texture[4], 0.2, 5);
-    drawPlanet("jupiter", texture[5], 0.2, 10);
-    drawPlanet("saturn", texture[6], 0.2, 11);
-    drawPlanet("uranus", texture[7], 0.2, -7);
-    drawPlanet("neptune", texture[9], 0.2, 8);
-    drawPlanet("moon", texture[8], 0.2, 9);
+//     Rotate scene.
+
+
+    drawPlanet("sun", texture[0]);
+    // Begin revolving ball.
+//    glTranslatef(2.0, 0.0, 0.0);
+//    glPushMatrix();
+//    glRotatef(latAngle, 0.0, 1.0, 0.0);
+
+//    glTranslatef(-2.0, 0.0, 0.0);
+
+//    glTranslatef(-20.0, 0.0, 0.0);
+    drawPlanet("mercury", texture[1]);
+//    drawPlanet("venus", texture[2]);
+//    drawPlanet("earth", texture[3]);
+//    drawPlanet("mars", texture[4]);
+//    drawPlanet("jupiter", texture[5]);
+//    drawPlanet("saturn", texture[6]);
+//    drawPlanet("uranus", texture[7]);
+//    drawPlanet("neptune", texture[9]);
+//    drawPlanet("moon", texture[8]);
 
     glutSwapBuffers();
 }
 
 
 
-// OpenGL window reshape routine.
 void Game::resize(int w, int h)
 {
-    glViewport (0, 0, w, h);
+    glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-5.0, 5.0, -5.0, 5.0, 5.0, 250.0);
+
+    // Adjust the viewing volume based on zoom factor
+    float zoomedWidth = 5.0f * zoomFactor;
+    float zoomedHeight = 5.0f * zoomFactor;
+    glFrustum(-zoomedWidth, zoomedWidth, -zoomedHeight, zoomedHeight, 5.0, 2000.0);
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -176,22 +214,70 @@ void Game::setup(void)
     // Cull the back faces of the sphere.
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+    glEnable(GL_DEPTH_TEST);  // Enable depth testing
+    animate(1);
 }
 
 // Keyboard input processing routine.
 void Game::keyInput(unsigned char key, int x, int y)
 {
-    if (key == 27) {
-        exit(0);
-    } else if(key == ' ') {
-        previousTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0; // Get initial time in seconds
-        animate(1);
+    switch (key)
+    {
+        case 27:
+            exit(0);
+            break;
+        case 'x':
+            Xangle += 5.0;
+            if (Xangle > 360.0) Xangle -= 360.0;
+            glutPostRedisplay();
+            break;
+        case 'X':
+            Xangle -= 5.0;
+            if (Xangle < 0.0) Xangle += 360.0;
+            glutPostRedisplay();
+            break;
+        case 'y':
+            Yangle += 5.0;
+            if (Yangle > 360.0) Yangle -= 360.0;
+            glutPostRedisplay();
+            break;
+        case 'Y':
+            Yangle -= 5.0;
+            if (Yangle < 0.0) Yangle += 360.0;
+            glutPostRedisplay();
+            break;
+        case 'z':
+            Zangle += 5.0;
+            if (Zangle > 360.0) Zangle -= 360.0;
+            glutPostRedisplay();
+            break;
+        case 'Z':
+            Zangle -= 5.0;
+            if (Zangle < 0.0) Zangle += 360.0;
+            glutPostRedisplay();
+            break;
+        default:
+            break;
     }
-    glutPostRedisplay();
 }
+
 
 void Game::specialKeyInput(int key, int x, int y)
 {
+    switch (key)
+    {
+        case GLUT_KEY_UP:
+            zoomFactor -= zoomStep;
+            if (zoomFactor < 0.1f) zoomFactor = 0.1f; // Limit minimum zoom
+            resize(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+            break;
+        case GLUT_KEY_DOWN:
+            zoomFactor += zoomStep;
+            resize(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+            break;
+        default:
+            break;
+    }
 
     glutPostRedisplay();
 }
@@ -210,16 +296,30 @@ void Game::loadTextures(string file, unsigned int t) {
 
 }
 
-void Game::drawPlanet(string planetName, unsigned int textureId,float radius, int offset) {
+void Game::drawPlanet(string planetName, unsigned int textureId) {
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     loadTextures("..//Images//Planets//" + planetName + ".bmp", textureId);
+
+    // Calculate the actual radius using the scaling factor
+    float baseRadius = 0.17;
+    float scaleFactor = planetScales[planetName] * 0.5;
+    float actualRadius = baseRadius * scaleFactor;
+
     // Map the texture onto the sphere.
     glBindTexture(GL_TEXTURE_2D, textureId);
     glPushMatrix();
-    glTranslatef(offset, 0, -30);
-    glScalef( 1.0f * radius,  aspectRatio * radius, 1.0f * radius);
+    glRotatef(Zangle, 0.0, 0.0, 1.0);
+    glRotatef(Yangle, 0.0, 1.0, 0.0);
+    glRotatef(Xangle, 1.0, 0.0, 0.0);
+
+    if (planetName != "sun") {
+        float distanceFromSun = planetDistances[planetName] * 0.01;
+        glRotatef(latAngle, 0.0, 1.0, 0.0);
+        glTranslatef(-10, 0.0, 0.0);
+    }
+    glScalef(1.0f * actualRadius, aspectRatio * actualRadius, 1.0f * actualRadius);
 
     for (int j = 0; j < q; j++)
     {
