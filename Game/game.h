@@ -29,12 +29,11 @@ public:
 
 private:
 
-    static const int animationPeriod = 10;
+    static const int animationPeriod = 100;
     unsigned int texture[12];
 
     void static animate(int value);
 
-    static void drawPlanets();
 };
 
 

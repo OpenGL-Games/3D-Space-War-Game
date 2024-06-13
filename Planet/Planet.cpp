@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void loadTextures(std::string file, unsigned int t) {
+void Planet::loadTextures(string file, unsigned int t) {
     imageFile* image = getBMP(file.c_str());
 
     if (!image) {
@@ -32,13 +32,7 @@ void loadTextures(std::string file, unsigned int t) {
     delete image;
 }
 
-
 Planet::Planet() = default;
-
-void Planet::initTexture() {
-    loadTextures("..//Images//Planets//11zon_compressed//" + planetName + ".bmp", textureID);
-}
-
 
 void Planet::setup(void) {
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -48,9 +42,6 @@ void Planet::setup(void) {
     vertices = new float[3 * (p + 1)*(q + 1)];
     textureCoordinates = new float[2 * (p + 1)*(q + 1)];
 
-    vertices = new float[3 * (p + 1) * (q + 1)];
-    textureCoordinates = new float[2 * (p + 1) * (q + 1)];
-
     // Set the array pointers.
     glVertexPointer(3, GL_FLOAT, 0, vertices);
     glTexCoordPointer(2, GL_FLOAT, 0, textureCoordinates);
@@ -59,10 +50,9 @@ void Planet::setup(void) {
     fillVertexArray();
     fillTextureCoordArray();
 
-    // Initialize texture
     initTexture();
-}
 
+}
 
 void Planet::fillVertexArray(void) {
     int i, j, k;
@@ -161,7 +151,6 @@ void Planet::drawPlanets(Planet *planets, float angle) {
             glTranslatef(x[0], 0, z[0]);             // Translate to the Sun's position
             glRotatef(angle, 0, 1, 0);               // Rotate around the Sun
             glTranslatef(x[i] - x[0], 0, z[i] - z[0]); // Translate to the planet's orbit position
-
             // Rotate the planet around its own axis
             glRotatef(angle, 0, 1, 0);               // Rotate around its own axis
             p.draw();
@@ -172,6 +161,10 @@ void Planet::drawPlanets(Planet *planets, float angle) {
 
     glPopMatrix();
 
+}
+
+void Planet::initTexture() {
+    loadTextures("..//Images//Planets//11zon_compressed//" + planetName + ".bmp", textureID);
 }
 
 

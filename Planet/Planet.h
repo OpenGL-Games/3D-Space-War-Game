@@ -17,6 +17,7 @@ public:
     int q = 200; // Number of grid rows
     int R = 10;
     float angle = 0.0;
+    void loadTextures(string file, unsigned int t);
 
     map<string, float> planetScales = {
             {"sun", 1392700.0 / 12742.0},

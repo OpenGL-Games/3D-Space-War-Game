@@ -16,5 +16,6 @@ add_executable(Game
         Asteriods/Asteriods.cpp
         Asteriods/Asteriods.h
         Asteriods/Asteriods.h
+        SpaceCraft/SpaceCraft.cpp
 )
 target_link_libraries(Game -lglew32 -lopengl32 -lfreeglut -lglu32 -lwinmm)
