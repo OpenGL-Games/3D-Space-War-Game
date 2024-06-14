@@ -42,8 +42,9 @@ Spacecraft::Spacecraft(float x, float y, float z, float a, bool e, unsigned int 
     lastShootTime = 2;
 }
 
-void loadTextures(string file, unsigned int t) {
-    imageFile *image = getBMP(file.c_str());
+
+void Spacecraft::loadTextures(string file, unsigned int t) {
+    imageFile* image = getBMP(file.c_str());
 
     if (!image) {
         std::cerr << "Failed to load image: " << file << std::endl;

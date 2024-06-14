@@ -8,28 +8,27 @@ using namespace std;
 
 class Planet {
 public:
-
     float *vertices = nullptr;
     float *textureCoordinates = nullptr;
+    float *normals = nullptr; // Array for normals
     unsigned int textureID{};
     string planetName;
     int p = 200; // Number of grid columns.
     int q = 200; // Number of grid rows
     int R = 10;
     float angle = 0.0;
-    void loadTextures(string file, unsigned int t);
 
     map<string, float> planetScales = {
-            {"sun", 1392700.0 / 12742.0},
-            {"mercury", 4880.0 / 12742.0},
-            {"venus", 12104.0 / 12742.0},
-            {"earth", 1.0f},
-            {"mars", 6779.0 / 12742.0},
-            {"jupiter", 139820.0 / 12742.0},
-            {"saturn", 116460.0 / 12742.0},
-            {"uranus", 50724.0 / 12742.0},
-            {"neptune", 49244.0 / 12742.0},
-            {"moon", 3474.0 / 12742.0}
+            {"sun", 1.0f},
+            {"mercury", 4880.0 / 1392700.0},
+            {"venus", 12104.0 / 1392700.0},
+            {"earth", 12742.0 / 1392700.0},
+            {"mars", 6779.0 / 1392700.0},
+            {"jupiter", 139820.0 / 1392700.0},
+            {"saturn", 116460.0 / 1392700.0},
+            {"uranus", 50724.0 / 1392700.0},
+            {"neptune", 49244.0 / 1392700.0},
+            {"moon", 3474.0 / 1392700.0}
     };
 
     map<string, float> planetDistances = {
@@ -45,7 +44,6 @@ public:
             {"moon", (149.6 + 0.384) * 5 / 100.0} // Distance from the Sun via Earth
     };
 
-
     Planet();
 
     void draw();
@@ -53,6 +51,7 @@ public:
     void setup(void);
 
     void static drawPlanets(Planet *planets, float angle);
+
 
 private:
     void fillVertexArray(void);
@@ -66,6 +65,11 @@ private:
     float h(int i, int j);
 
     void initTexture();
+
+//    void loadTextures(std::string file, unsigned int t);
+
+
+    void setMaterialProperties(float r, float g, float b);
 };
 
 #endif //GAME_PLANET_H

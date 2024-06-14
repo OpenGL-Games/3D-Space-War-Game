@@ -2,6 +2,8 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include "game.h"
+#include <windows.h>
+#include <mmsystem.h>
 #include <cmath>
 #include "../Planet/Planet.h"
 #include "../Asteriods/Asteriods.h"
@@ -27,7 +29,9 @@ float timeRemaining = 300.0; // Start at 300 seconds
 int currTime = 0;
 
 vector<Pickable *> pickables;
+
 int pickableGenerationInterval = 10000; // Generate new pickables every 10 seconds
+
 int lastPickableGenerationTime = 0;
 
 Game::Game() = default;
@@ -57,6 +61,7 @@ void updatePickables() {
         }
     }
 }
+
 
 void checkProjectileCollisions() {
     // Check collisions between enemy projectiles and player
@@ -96,17 +101,26 @@ void checkProjectileCollisions() {
     }
 }
 
+
+void pickableSound() {
+    PlaySound("..//Sounds//pickable-object.wav", nullptr, SND_ASYNC);
+}
+
 void checkPickableCollisions() {
     for (auto &pickable: pickables) {
         if (pickable->isActive()) {
             float distance = sqrt(pow(spaceCraft->getX() - pickable->x, 2) +
                                   pow(spaceCraft->getZ() - pickable->z, 2) + pow(pickable->y, 2));
-            if (distance < 2.0) { // Collision threshold
+
+            if (distance < 1.0) { // Collision threshold
+                pickableSound();
+
                 if (pickable->type == 0) {
                     cout << "health collision" << endl;
                     spaceCraft->increaseHealth(10); // Increase health
                 } else {
                     cout << "weapon collision" << endl;
+
                     for (auto &projectile: spaceCraft->projectiles) {
                         if (projectile.isActive()) {
                             projectile.increaseStrength(1);
@@ -285,9 +299,31 @@ void Game::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    // camera transformation
-    gluLookAt(0.0, 0.0, 30.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    // Retrieve spacecraft position and orientation
+    float spaceCraftX = spaceCraft->getX();
+    float spaceCraftZ = spaceCraft->getZ();
+    float spaceCraftAngle = spaceCraft->getAngle();
 
+    // Calculate the direction vector the spacecraft is facing
+    float dirX = sin(spaceCraftAngle * M_PI / 180.0);
+    float dirZ = cos(spaceCraftAngle * M_PI / 180.0);
+
+    // Calculate the camera position to be behind the spacecraft
+    float cameraX = spaceCraftX - dirX * 15;
+    float cameraZ = spaceCraftZ - dirZ * 15;
+    float cameraY = 2.0;  // Set the camera height above the ground
+
+    // Calculate the look-at point to be the current position of the spacecraft
+    float lookAtX = spaceCraftX;
+    float lookAtZ = spaceCraftZ;
+    float lookAtY = 0.0;  // Look-at height (ground level)
+
+    // Set the camera position and look-at point using gluLookAt
+    gluLookAt(
+            cameraX, cameraY, cameraZ, // Camera position
+            lookAtX, lookAtY, lookAtZ, // Look-at point
+            0.0, 1.0, 0.0              // Up vector
+    );
     // global transformation
     glPushMatrix();
     glTranslatef(0.0, 0.0, -6);
@@ -304,15 +340,17 @@ void Game::draw() {
 
 
     // planets setup and draw
-    planets = new Planet[9];
-    for (int i = 0; i < 9; i++) {
+    planets = new Planet[10];
+    for (int i = 0; i < 10; i++) {
         planets[i].textureID = texture[i];
         planets[i].planetName = planetNames[i];
         planets[i].setup();
     }
     Planet::drawPlanets(planets, angle);
 
+
     drawProjectiles();
+
 
     // draw asteroids
     asteriods->draw();
@@ -350,12 +388,17 @@ void Game::setup(void) {
     asteriods = new Asteriods();
 
     // spacecraft instance
-    spaceCraft = new Spacecraft(texture[9], texture[10]);
+    spaceCraft = new Spacecraft(texture[10], texture[11]);
 
     generateEnemies(texture);
 
     generatePickables();
     animate();
+}
+
+
+void shootSound() {
+    PlaySound("..//Sounds//shoot.wav", nullptr, SND_ASYNC);
 }
 
 
@@ -369,6 +412,10 @@ void Game::keyInput(unsigned char key, int x, int y) {
             // Shoot
         case ' ': {
             spaceCraft->shoot();
+
+            shootSound();
+            glutPostRedisplay();
+
             break;
         }
         default:
@@ -383,6 +430,7 @@ void Game::specialKeyInput(int key, int x, int y) {
     float tempxVal = spaceCraft->getX(), tempzVal = spaceCraft->getZ(), tempAngle = spaceCraft->getAngle();
 
     // Compute next position.
+
     if (key == GLUT_KEY_RIGHT) tempAngle = craftAngle + 8.0;
     if (key == GLUT_KEY_LEFT) tempAngle = craftAngle - 8.0;
     if (key == GLUT_KEY_DOWN) {

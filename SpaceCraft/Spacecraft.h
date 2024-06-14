@@ -54,6 +54,9 @@ private:
 
     void fillTextureCoordArray(void);
 
+    void loadTextures(string file, unsigned int t);
+
+
     vector<float> vertices;
     vector<float> textureCoordinates;
     float xVal, zVal; // Coordinates of the spacecraft
