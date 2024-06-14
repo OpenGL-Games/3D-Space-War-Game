@@ -15,12 +15,8 @@ Spacecraft::Spacecraft(unsigned int tex1, unsigned int tex2) {
 }
 
 void loadTextures(string file, unsigned int t) {
-    imageFile *image[1];
-    image[0] = getBMP(file.c_str());
 
     glBindTexture(GL_TEXTURE_2D, t);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[0]->width, image[0]->height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, image[0]->data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
