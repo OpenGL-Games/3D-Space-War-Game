@@ -1,4 +1,4 @@
-# Install script for directory: E:/CSED25/3rd year/CSED 25/2nd Term/Computer Graphics/Project/Game
+# Install script for directory: D:/Data/3rd year/2nd term/Graphics/Project/3D-Space-War-Game
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,7 +34,7 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/Program Files/JetBrains/CLion 2023.3.4/bin/mingw/bin/objdump.exe")
+  set(CMAKE_OBJDUMP "C:/msys64/ucrt64/bin/objdump.exe")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "E:/CSED25/3rd year/CSED 25/2nd Term/Computer Graphics/Project/Game/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "D:/Data/3rd year/2nd term/Graphics/Project/3D-Space-War-Game/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

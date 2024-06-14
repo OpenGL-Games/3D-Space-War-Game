@@ -11,5 +11,13 @@ add_executable(Game
         Texture/getBMP.cpp
         Game/game.cpp
         Game/game.h
+        Asteriods/Asteriods.cpp
+        Asteriods/Asteriods.h
+        Planet/Planet.cpp
+        Planet/Planet.h
+        SpaceCraft/Spacecraft.cpp
+        SpaceCraft/Spacecraft.h
+        Projectile/Projectile.h
+        Projectile/Projectile.cpp
 )
 target_link_libraries(Game -lglew32 -lopengl32 -lfreeglut -lglu32 -lwinmm)

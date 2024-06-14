@@ -3,13 +3,14 @@
 #include <GL/freeglut.h>
 #include "menu.h"
 #include "../Texture/getBMP.h"
+#include "../Game/game.h"
 
 using namespace std;
 
 extern int windowChoice;
+extern Game game;
 
 Menu::Menu() : selectedOption(0){
-
 }
 
 void Menu::draw(){
@@ -70,17 +71,16 @@ void Menu::loadTextures()
 void Menu::drawText(int x, int y, const char* text, bool selected) {
     glPushMatrix();
     glLineWidth(3.5);
-    glTranslatef(-13.0f, 0.0f + y, -15.0f);  // Shift selected option to the right
+    glTranslatef(-13.0f, 0.0f + y, -15.0f);
     glRasterPos2f(x, y);
     if (selected) {
         glTranslatef(0.9, 0, 0);
         glScalef(0.008, 0.008, 1);
-        glColor3f(213/255.0, 107/255.0, 119/255.5);        // Red color for selected option
-
+        glColor3f(213/255.0, 107/255.0, 119/255.5);
     }
     else {
         glScalef(0.006,0.006,1);
-        glColor3f(143/255.0, 161/255.0, 197/255.5);        // Red color for selected option
+        glColor3f(143/255.0, 161/255.0, 197/255.5);
     }
     glutStrokeString(GLUT_STROKE_ROMAN, (unsigned char*)text);
 
@@ -93,7 +93,7 @@ void Menu::selectNext() {
 }
 
 void Menu::selectPrevious() {
-    selectedOption = (selectedOption - 1) % 3;
+    selectedOption = (3 + (selectedOption - 1) % 3) % 3;
     glutPostRedisplay();
 }
 
@@ -103,11 +103,10 @@ void Menu::resize(int w, int h)
     glViewport (0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-5.0, 5.0, -5.0, 5.0, 5.0, 50.0);
+    glFrustum(-5.0, 5.0, -5.0, 5.0, 5.0, 250.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
-
 
 // Initialization routine.
 void Menu::setup(void)
@@ -130,11 +129,15 @@ void Menu::keyInput(unsigned char key, int x, int y)
     if (key == 13) { // Enter key
         if(selectedOption == 0){
             windowChoice = 1;
-        }else if (selectedOption == 2) {
+            game.setup();
+            glutReshapeFunc(Game::resize);
+        } else if (selectedOption == 2) {
             exit(0);
         }
         // Handle other selections (START_GAME, MODES)
         std::cout << "Selected option: " << selectedOption << std::endl;
+    } else if (key == 27) { // Escape key
+        exit(0);
     }
     glutPostRedisplay();
 }

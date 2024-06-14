@@ -1,3 +1,3 @@
-E:/CSED25/3rd year/CSED 25/2nd Term/Computer Graphics/Project/Game/cmake-build-debug/CMakeFiles/Game.dir
-E:/CSED25/3rd year/CSED 25/2nd Term/Computer Graphics/Project/Game/cmake-build-debug/CMakeFiles/edit_cache.dir
-E:/CSED25/3rd year/CSED 25/2nd Term/Computer Graphics/Project/Game/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+D:/Data/3rd year/2nd term/Graphics/Project/3D-Space-War-Game/cmake-build-debug/CMakeFiles/Game.dir
+D:/Data/3rd year/2nd term/Graphics/Project/3D-Space-War-Game/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/Data/3rd year/2nd term/Graphics/Project/3D-Space-War-Game/cmake-build-debug/CMakeFiles/rebuild_cache.dir
