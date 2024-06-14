@@ -5,7 +5,7 @@
 
 class Projectile {
 public:
-    Projectile(float startX, float startY, float startZ, float directionX, float directionZ);
+    Projectile(float startX, float startY, float startZ, float directionX, float directionZ, float rad);
     void draw();
     void update(float dt);
 
@@ -18,6 +18,8 @@ public:
     int getStrength() const;
 
     void setStrength(int strength);
+    void setRadius(float rad) {radius = rad;}
+    void setColor(const float col[3]);
     void increaseStrength(int val);
 
 private:
@@ -25,14 +27,14 @@ private:
     float dirX, dirZ;       // Direction of movement
     bool active;            // Is the projectile active?
     int strength = 1;
+    float radius = 0.2;
+    float color[3] = {1.0f, 1.0f, 0.0f}; // Default color (light yellow)
 
     static const float speed; // Speed of the projectile
 
     GLuint projectileDisplayList;
 
     void createProjectileDisplayList();
-
-    void setColor(float *color);
 
     void updateColorAndRadius();
 };
