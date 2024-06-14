@@ -2,6 +2,8 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include "game.h"
+#include <windows.h>
+#include <mmsystem.h>
 #include <cmath>
 #include "../Planet/Planet.h"
 #include "../Asteriods/Asteriods.h"
@@ -24,7 +26,7 @@ float craftAngle = 0;
 float timeRemaining = 300.0; // Start at 300 seconds
 int currTime = 0;
 
-vector<Pickable*> pickables;
+vector<Pickable *> pickables;
 int pickableGenerationInterval = 2000; // Generate new pickables every 10 seconds
 int lastPickableGenerationTime = 0;
 
@@ -41,7 +43,7 @@ void generatePickables() {
 }
 
 void drawPickables() {
-    for (auto &pickable : pickables) {
+    for (auto &pickable: pickables) {
         if (pickable->isActive()) {
             pickable->draw();
         }
@@ -49,15 +51,18 @@ void drawPickables() {
 }
 
 void updatePickables() {
-    for (auto &pickable : pickables) {
+    for (auto &pickable: pickables) {
         if (pickable->isActive()) {
             pickable->update();
         }
     }
 }
 
+void pickableSound() {
+    PlaySound("..//Sounds//pickable-object.wav", nullptr, SND_ASYNC);
+}
 void checkPickableCollisions() {
-    for (auto &pickable : pickables) {
+    for (auto &pickable: pickables) {
         if (pickable->isActive()) {
             float distance = sqrt(pow(spaceCraft->getX() - pickable->x, 2) +
                                   pow(spaceCraft->getZ() - pickable->z, 2) + pow(pickable->y, 2));
@@ -65,13 +70,14 @@ void checkPickableCollisions() {
 //            cout << pickable->x << " " << pickable->y << " " << pickable->z << endl;
 //            cout << distance << endl;
             if (distance < 1.0) { // Collision threshold
+                pickableSound();
                 if (pickable->type == 0) {
                     cout << "health collision" << endl;
                     spaceCraft->increaseHealth(10); // Increase health
                 } else {
                     cout << "weapon collision" << endl;
 //                    spaceCraft->increaseWeaponStrength(); // Increase weapon strength
-                    for (auto& projectile : spaceCraft->projectiles) {
+                    for (auto &projectile: spaceCraft->projectiles) {
                         if (projectile.isActive()) {
                             projectile.increaseStrength(1);
                         }
@@ -111,7 +117,7 @@ void drawHUD() {
 
     // Draw health bar squares
     glColor3f(0.0f, 1.0f, 0.0f);
-    for (int i = 0; i < (float)spaceCraft->getHealth() / 10; ++i) {
+    for (int i = 0; i < (float) spaceCraft->getHealth() / 10; ++i) {
         glBegin(GL_QUADS);
         glVertex2f(50 + (i * 20), 550);
         glVertex2f(65 + (i * 20), 550);
@@ -127,21 +133,21 @@ void drawHUD() {
     glColor3f(1.0f, 1.0f, 1.0f);
     glRasterPos2f(600, 550);
     string scoreText = "Score: " + to_string(spaceCraft->getScore());
-    for (char c : scoreText) {
+    for (char c: scoreText) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
     }
     drawFrame(590, 540, 150, 30);
 
     // Draw time remaining with fancy frame
     glRasterPos2f(600, 520);
-    string timeText = "Time: " + to_string((int)timeRemaining);
+    string timeText = "Time: " + to_string((int) timeRemaining);
 
     // Decrease time remaining
     timeRemaining -= (static_cast<int>(time(nullptr)) - currTime);
     currTime = static_cast<int>(time(nullptr));
     if (timeRemaining < 0) timeRemaining = 0; // Ensure it doesn't go below 0
 
-    for (char c : timeText) {
+    for (char c: timeText) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
     }
     drawFrame(590, 510, 150, 30);
@@ -159,7 +165,7 @@ void drawHUD() {
 
 // Function to draw all active projectiles
 void drawProjectiles() {
-    for (auto& projectile : spaceCraft->projectiles) {
+    for (auto &projectile: spaceCraft->projectiles) {
         if (projectile.isActive()) {
             projectile.draw();
         }
@@ -168,7 +174,7 @@ void drawProjectiles() {
 
 // Function to update all active projectiles
 void updateProjectiles(float dt) {
-    for (auto& projectile : spaceCraft->projectiles) {
+    for (auto &projectile: spaceCraft->projectiles) {
         if (projectile.isActive()) {
             projectile.update(dt);
         }
@@ -180,7 +186,7 @@ void Game::animate(int value = 0) {
     updateProjectiles(12);
     updatePickables();
     checkPickableCollisions();
-    if(angle > 360) angle = 0;
+    if (angle > 360) angle = 0;
 
     int currentTime = glutGet(GLUT_ELAPSED_TIME);
     if (currentTime - lastPickableGenerationTime > pickableGenerationInterval) {
@@ -196,9 +202,31 @@ void Game::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    // camera transformation
-    gluLookAt(0.0, 0.0, 30.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    // Retrieve spacecraft position and orientation
+    float spaceCraftX = spaceCraft->getX();
+    float spaceCraftZ = spaceCraft->getZ();
+    float spaceCraftAngle = spaceCraft->getAngle();
 
+    // Calculate the direction vector the spacecraft is facing
+    float dirX = sin(spaceCraftAngle * M_PI / 180.0);
+    float dirZ = cos(spaceCraftAngle * M_PI / 180.0);
+
+    // Calculate the camera position to be behind the spacecraft
+    float cameraX = spaceCraftX - dirX * 15;
+    float cameraZ = spaceCraftZ - dirZ * 15;
+    float cameraY = 2.0;  // Set the camera height above the ground
+
+    // Calculate the look-at point to be the current position of the spacecraft
+    float lookAtX = spaceCraftX;
+    float lookAtZ = spaceCraftZ;
+    float lookAtY = 0.0;  // Look-at height (ground level)
+
+    // Set the camera position and look-at point using gluLookAt
+    gluLookAt(
+            cameraX, cameraY, cameraZ, // Camera position
+            lookAtX, lookAtY, lookAtZ, // Look-at point
+            0.0, 1.0, 0.0              // Up vector
+    );
     // global transformation
     glPushMatrix();
     glTranslatef(0.0, 0.0, -6);
@@ -216,14 +244,13 @@ void Game::draw() {
     drawProjectiles();
 
     // planets setup and draw
-    planets = new Planet[9];
-    for (int i = 0; i < 9; i++) {
+    planets = new Planet[10];
+    for (int i = 0; i < 10; i++) {
         planets[i].textureID = texture[i];
         planets[i].planetName = planetNames[i];
         planets[i].setup();
     }
     Planet::drawPlanets(planets, angle);
-
 
     // draw asteroids
     asteriods->draw();
@@ -253,7 +280,7 @@ void Game::setup(void) {
     // calc aspect ratio
     int screenWidth = glutGet(GLUT_WINDOW_WIDTH);
     int screenHeight = glutGet(GLUT_WINDOW_HEIGHT);
-    aspectRatio = (float)screenWidth / (float)screenHeight;
+    aspectRatio = (float) screenWidth / (float) screenHeight;
 
     // Load textures
     glGenTextures(12, texture);
@@ -262,25 +289,28 @@ void Game::setup(void) {
     asteriods = new Asteriods();
 
     // spacecraft instance
-    spaceCraft = new Spacecraft(texture[9], texture[10]);
+    spaceCraft = new Spacecraft(texture[10], texture[11]);
 
     generatePickables();
     animate();
 }
 
+void shootSound() {
+    PlaySound("..//Sounds//shoot.wav", nullptr, SND_ASYNC);
+}
+
 // handle ESC and Shoot
 void Game::keyInput(unsigned char key, int x, int y) {
-    switch (key)
-    {
+    switch (key) {
         // ESC key
         case 27:
             exit(0);
             break;
             // Shoot
-        case ' ':
-        {
+        case ' ': {
             spaceCraft->shoot();
-//            glutPostRedisplay();
+            shootSound();
+            glutPostRedisplay();
             break;
         }
         default:
@@ -295,15 +325,14 @@ void Game::specialKeyInput(int key, int x, int y) {
     float tempxVal = spaceCraft->getX(), tempzVal = spaceCraft->getZ(), tempAngle = spaceCraft->getAngle();
 
     // Compute next position.
+
     if (key == GLUT_KEY_RIGHT) tempAngle = craftAngle + 8.0;
     if (key == GLUT_KEY_LEFT) tempAngle = craftAngle - 8.0;
-    if (key == GLUT_KEY_DOWN)
-    {
+    if (key == GLUT_KEY_DOWN) {
         tempxVal = spaceCraft->getX() - sin(craftAngle * M_PI / 180.0);
         tempzVal = spaceCraft->getZ() - cos(craftAngle * M_PI / 180.0);
     }
-    if (key == GLUT_KEY_UP)
-    {
+    if (key == GLUT_KEY_UP) {
         tempxVal = spaceCraft->getX() + sin(craftAngle * M_PI / 180.0);
         tempzVal = spaceCraft->getZ() + cos(craftAngle * M_PI / 180.0);
     }

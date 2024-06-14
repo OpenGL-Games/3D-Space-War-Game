@@ -15,7 +15,7 @@ Spacecraft::Spacecraft(unsigned int tex1, unsigned int tex2) {
     score = 0;
 }
 
-void loadTextures(string file, unsigned int t) {
+void Spacecraft::loadTextures(string file, unsigned int t) {
     imageFile* image = getBMP(file.c_str());
 
     if (!image) {

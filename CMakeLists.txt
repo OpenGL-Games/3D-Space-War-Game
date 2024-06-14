@@ -19,5 +19,6 @@ add_executable(Game
         SpaceCraft/Spacecraft.h
         Projectile/Projectile.h
         Projectile/Projectile.cpp
+        Pickable/Pickable.cpp
 )
 target_link_libraries(Game -lglew32 -lopengl32 -lfreeglut -lglu32 -lwinmm)
