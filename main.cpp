@@ -48,7 +48,7 @@ void resize(int w, int h)
 
 void setWindowIcon() {
     // Load icon file
-    auto hIcon = (HICON)LoadImage(nullptr, "Images//icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+    auto hIcon = (HICON)LoadImage(nullptr, "..//Images//icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
     if (hIcon == nullptr) {
         // Error loading icon
         std::cerr << "Failed to load icon!" << std::endl;
@@ -61,7 +61,7 @@ void setWindowIcon() {
 }
 
 void loadBackGroundSound() {
-    //PlaySound("Sounds//game.wav", nullptr, SND_ASYNC);
+//    PlaySound("..//Sounds//game.wav", nullptr, SND_ASYNC);
 }
 
 // Main routine.
