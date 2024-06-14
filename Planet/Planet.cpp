@@ -46,7 +46,7 @@ void Planet::setup(void) {
     fillVertexArray();
     fillTextureCoordArray();
 
-    loadTextures("..//Images//Planets//" + planetName + ".bmp", textureID);
+    loadTextures("Images//Planets//" + planetName + ".bmp", textureID);
 }
 
 void Planet::fillVertexArray(void) {

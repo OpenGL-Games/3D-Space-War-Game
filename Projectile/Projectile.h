@@ -10,6 +10,7 @@ public:
     void update(float dt);
 
     bool isActive() const { return active; }
+    void deactivate() { active = false; }
     float getX() const { return posX; }
     float getY() const { return posY; }
     float getZ() const { return posZ; }

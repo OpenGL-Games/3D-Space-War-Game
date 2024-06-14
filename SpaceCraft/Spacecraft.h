@@ -14,6 +14,8 @@ class Spacecraft {
 public:
     Spacecraft(unsigned int tex1, unsigned int tex2); // Constructor
 
+    Spacecraft(float x, float y ,float z, float a,bool e, unsigned int tex1, unsigned int tex2);
+
     void draw(); // Draw method
     void update(float delta_time); // Update method for animation
     void move(float dx, float dz); // Method to move the spacecraft
@@ -21,11 +23,13 @@ public:
     void shoot(); // Method to shoot projectiles
     void takeDamage(int damage); // Method to decrease health
     void increaseHealth(int healthIncrease); // Method to increase health
+    void deactivate() { active = false; }
     void increaseScore(int val);
     void setup();
     // Getters
     float getX() const { return xVal; }
     float getZ() const { return zVal; }
+    float getY() const { return 0.0; }
     float getAngle() const { return angle; }
     int getHealth() const { return health; }
     int getScore() const { return score; }
@@ -40,7 +44,7 @@ public:
     void setEnemy(bool e) { enemy = e; }
     unsigned int texture[2];
     vector<Projectile> projectiles; // Vector to store projectiles
-
+    bool isActive() const { return active; }
     int count;
 private:
     void fillVertexArray(void);
@@ -54,6 +58,7 @@ private:
     int health; // Health of the spacecraft
     int score;
     bool enemy;
+    bool active;
     unsigned int spacecraftModel; // Display list for the spacecraft model
 };
 

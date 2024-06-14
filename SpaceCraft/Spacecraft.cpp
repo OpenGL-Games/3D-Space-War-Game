@@ -15,6 +15,17 @@ Spacecraft::Spacecraft(unsigned int tex1, unsigned int tex2) {
     score = 0;
 }
 
+Spacecraft::Spacecraft(float x,float y, float z, float a,bool e, unsigned int tex1, unsigned int tex2) {
+    xVal = x;
+    zVal = z;
+    angle = a;
+    texture[0] = tex1;
+    texture[1] = tex2;
+    health = 50; // Initial health
+    score = 0;
+    enemy = e;
+}
+
 void loadTextures(string file, unsigned int t) {
     imageFile* image = getBMP(file.c_str());
 
@@ -87,6 +98,14 @@ void Spacecraft::draw() {
 
 void Spacecraft::update(float delta_time) {
     // Perform any animation or update logic here
+    if(!isActive()) 
+        return;
+    if(enemy) {
+        zVal += 0.1f;
+        if (zVal > 10.0f) {
+            zVal = -10.0f;
+        }
+    }
 }
 
 void Spacecraft::move(float dx, float dz) {
@@ -186,10 +205,10 @@ void Spacecraft::setup() {
 
 //     Load textures
     if (enemy) {
-        loadTextures("..//Images//enemy.bmp", texture[1]);
+        loadTextures("Images//enemy.bmp", texture[1]);
     }
     else {
-        loadTextures("..//Images//spacecraft.bmp", texture[0]);
+        loadTextures("Images//spacecraft.bmp", texture[0]);
     }
 }
 
