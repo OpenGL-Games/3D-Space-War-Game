@@ -11,7 +11,8 @@ Spacecraft::Spacecraft(unsigned int tex1, unsigned int tex2) {
     xVal = 0;
     zVal = -10;
     angle = 0;
-    health = 100; // Initial health
+    health = 50; // Initial health
+    score = 0;
 }
 
 void loadTextures(string file, unsigned int t) {
@@ -190,4 +191,8 @@ void Spacecraft::setup() {
     else {
         loadTextures("..//Images//spacecraft.bmp", texture[0]);
     }
+}
+
+void Spacecraft::increaseScore(int val) {
+    score += val;
 }
