@@ -31,9 +31,7 @@ private:
 
     static const int animationPeriod = 10;
     unsigned int texture[12];
-
     void static animate(int value);
-
 };
 
 

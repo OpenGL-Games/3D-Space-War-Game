@@ -5,6 +5,17 @@
 
 int slices = 20;
 
+Spacecraft::Spacecraft() {
+    xVal = 0;
+    zVal = -10;
+    angle = 0;
+    health = 50; // Initial health
+    score = 0;
+    enemy = false;
+    active = true;
+    lastShootTime = 2;
+}
+
 Spacecraft::Spacecraft(unsigned int tex1, unsigned int tex2) {
     texture[0] = tex1;
     texture[1] = tex2;
@@ -13,7 +24,24 @@ Spacecraft::Spacecraft(unsigned int tex1, unsigned int tex2) {
     angle = 0;
     health = 50; // Initial health
     score = 0;
+    enemy = false;
+    active = true;
+    lastShootTime = 2;
 }
+
+Spacecraft::Spacecraft(float x, float y, float z, float a, bool e, unsigned int tex1, unsigned int tex2) {
+    xVal = x;
+    zVal = z;
+    angle = a;
+    health = 50; // Initial health
+    score = 0;
+    enemy = e;
+    texture[0] = tex1;
+    texture[1] = tex2;
+    active = true;
+    lastShootTime = 2;
+}
+
 
 void Spacecraft::loadTextures(string file, unsigned int t) {
     imageFile* image = getBMP(file.c_str());
@@ -37,56 +65,67 @@ void Spacecraft::loadTextures(string file, unsigned int t) {
 }
 
 void Spacecraft::draw() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    if(enemy) {
+    glPushMatrix();
+    glTranslatef(xVal, 0.0, zVal);
+    glRotatef(angle, 0.0, 1.0, 0.0);
+    if (enemy) {
+        glScalef(0.5f, 0.5f, 0.5f);
+
         // Map the texture onto the sphere.
         glBindTexture(GL_TEXTURE_2D, texture[1]);
 
-        // Draw base circle
-        glBegin(GL_TRIANGLE_FAN);
-        for (int i = 0; i < slices; ++i) {
-            glArrayElement(i);
-        }
-        glEnd();
-
-        // Draw sides
-        glBegin(GL_TRIANGLE_FAN);
-        for (int i = 0; i < slices; ++i) {
-            glArrayElement(i);
-            glArrayElement(slices); // Apex vertex
-        }
-        glEnd();
-    }
-    else {
+    } else {
         // Map the texture onto the sphere.
         glBindTexture(GL_TEXTURE_2D, texture[0]);
-
-        // Draw base circle
-        glBegin(GL_TRIANGLE_FAN);
-        for (int i = 0; i < slices; ++i) {
-            glArrayElement(i);
-        }
-        glEnd();
-
-        // Draw sides
-        glBegin(GL_TRIANGLE_FAN);
-        for (int i = 0; i < slices; ++i) {
-            glArrayElement(i);
-            glArrayElement(slices); // Apex vertex
-        }
-        glEnd();
     }
+
+    // Draw base circle
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < slices; ++i) {
+        glArrayElement(i);
+    }
+    glEnd();
+
+    // Draw sides
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < slices; ++i) {
+        glArrayElement(i);
+        glArrayElement(slices); // Apex vertex
+    }
+    glEnd();
+    glPopMatrix();
 
     // Disable texturing
     glDisable(GL_TEXTURE_2D);
 }
 
-void Spacecraft::update(float delta_time) {
+void Spacecraft::updateEnemy(float xTarget, float zTarget) {
     // Perform any animation or update logic here
+    if (!isActive())
+        return;
+    if (enemy) {
+        if (xTarget > xVal) {
+            xVal += 0.1f;
+        } else if (xTarget < xVal) {
+            xVal -= 0.1f;
+        }
+        if (zTarget > zVal) {
+            zVal += 0.1f;
+        } else if (zTarget < zVal) {
+            zVal -= 0.1f;
+        }
+
+        // Calculate the angle to face the target
+        float dx = xTarget - xVal;
+        float dz = zTarget - zVal;
+        angle = atan2(dx, dz) * 180.0 / M_PI; // Convert radians to degrees
+//        cout << angle << endl;
+    }
 }
 
 void Spacecraft::move(float dx, float dz) {
@@ -103,18 +142,29 @@ void Spacecraft::rotate(float angle_change) {
 }
 
 void Spacecraft::shoot() {
-//    cout << "Shooting!" << endl;
-    // Calculate direction of projectile based on spacecraft's orientation
-    float directionX = sin(angle * M_PI / 180.0); // Example: Shoot along negative z-axis
-    float directionZ = cos(angle * M_PI / 180.0);
+    int currentTime = glutGet(GLUT_ELAPSED_TIME);
+    if (currentTime - lastShootTime >= shootInterval) {
+        float directionX = sin(angle * M_PI / 180.0);
+        float directionZ = cos(angle * M_PI / 180.0);
 
-    // Create a new projectile at the spacecraft's position
-    projectiles.emplace_back(xVal, 0.0 , zVal, directionX, directionZ);
+        if (enemy) {
+            Projectile proj(xVal, 0.0, zVal, directionX, directionZ, 0.3);
+            float enemyColor[3] = {0.0f, 0.5f, 0.5f}; // Red color for enemy projectiles
+            proj.setColor(enemyColor);
+            projectiles.push_back(proj);
+        } else {
+            Projectile proj(xVal, 0.0, zVal, directionX, directionZ, 0.2);
+            projectiles.push_back(proj);
+        }
+
+        lastShootTime = currentTime; // Update last shoot time
+    }
 }
 
 void Spacecraft::takeDamage(int damage) {
     health -= damage;
     if (health <= 0) {
+        active = false;
         std::cout << "Spacecraft destroyed!" << std::endl;
         // Implement spacecraft destruction logic here
     }
@@ -187,10 +237,10 @@ void Spacecraft::setup() {
 //     Load textures
     if (enemy) {
         loadTextures("..//Images//enemy.bmp", texture[1]);
-    }
-    else {
+    } else {
         loadTextures("..//Images//spacecraft.bmp", texture[0]);
     }
+
 }
 
 void Spacecraft::increaseScore(int val) {

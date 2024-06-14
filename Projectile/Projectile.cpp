@@ -6,11 +6,10 @@
 using namespace std;
 
 const float Projectile::speed = 0.5f;
-float radius = 0.2f; // Default radius
-float color[3] = {1.0f, 1.0f, 0.0f}; // Default color (light yellow)
 
-Projectile::Projectile(float startX, float startY, float startZ, float directionX, float directionZ)
-        : posX(startX), posY(startY), posZ(startZ), dirX(directionX), dirZ(directionZ), active(true), strength(1) {
+
+Projectile::Projectile(float startX, float startY, float startZ, float directionX, float directionZ, float rad)
+        : posX(startX), posY(startY), posZ(startZ), dirX(directionX), dirZ(directionZ), active(true), strength(1), radius(rad) {
     createProjectileDisplayList();
 }
 
@@ -67,6 +66,12 @@ void Projectile::updateColorAndRadius() {
         color[1] = 0;
         color[2] += 0.01;
         if(color[2] >= 1) color[2] = 1;
+    }
+}
+
+void Projectile::setColor(const float col[3]) {
+    for (int i = 0; i < 3; ++i) {
+        color[i] = col[i];
     }
 }
 

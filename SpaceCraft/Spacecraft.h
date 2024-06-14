@@ -12,20 +12,26 @@ using namespace std;
 
 class Spacecraft {
 public:
+    Spacecraft();
+
     Spacecraft(unsigned int tex1, unsigned int tex2); // Constructor
 
+    Spacecraft(float x, float y ,float z, float a,bool e, unsigned int tex1, unsigned int tex2);
+
     void draw(); // Draw method
-    void update(float delta_time); // Update method for animation
+    void updateEnemy(float xTarget, float zTarget); // Update method for animation
     void move(float dx, float dz); // Method to move the spacecraft
     void rotate(float angle_change); // Method to rotate the spacecraft
     void shoot(); // Method to shoot projectiles
     void takeDamage(int damage); // Method to decrease health
     void increaseHealth(int healthIncrease); // Method to increase health
+    void deactivate() { active = false; }
     void increaseScore(int val);
     void setup();
     // Getters
     float getX() const { return xVal; }
     float getZ() const { return zVal; }
+    float getY() const { return 0.0; }
     float getAngle() const { return angle; }
     int getHealth() const { return health; }
     int getScore() const { return score; }
@@ -38,9 +44,10 @@ public:
     void setScore(int s) { score = s; }
 
     void setEnemy(bool e) { enemy = e; }
+    void setTextures(unsigned int tx1, unsigned int tx2) { text1 = tx1; text2 = tx2; }
     unsigned int texture[2];
     vector<Projectile> projectiles; // Vector to store projectiles
-
+    bool isActive() const { return active; }
     int count;
 private:
     void fillVertexArray(void);
@@ -57,7 +64,15 @@ private:
     int health; // Health of the spacecraft
     int score;
     bool enemy;
+    bool active;
     unsigned int spacecraftModel; // Display list for the spacecraft model
+    unsigned int text1;
+    unsigned int text2;
+
+    int lastShootTime; // Last shoot time in milliseconds
+
+    static const int shootInterval = 3000; // 3 seconds in milliseconds
+
 };
 
 #endif // SPACECRAFT_H

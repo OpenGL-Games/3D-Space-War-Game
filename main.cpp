@@ -61,7 +61,7 @@ void setWindowIcon() {
 }
 
 void loadBackGroundSound() {
-    PlaySound("..//Sounds//game.wav", nullptr, SND_ASYNC);
+//    PlaySound("..//Sounds//game.wav", nullptr, SND_ASYNC);
 }
 
 // Main routine.
