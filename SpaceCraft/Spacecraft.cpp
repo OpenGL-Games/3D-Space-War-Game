@@ -66,6 +66,8 @@ void Spacecraft::loadTextures(string file, unsigned int t) {
 
 void Spacecraft::draw() {
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if(!active) return;
+
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -110,14 +112,14 @@ void Spacecraft::updateEnemy(float xTarget, float zTarget) {
         return;
     if (enemy) {
         if (xTarget > xVal) {
-            xVal += 0.1f;
+            xVal += 0.05f;
         } else if (xTarget < xVal) {
-            xVal -= 0.1f;
+            xVal -= 0.05f;
         }
         if (zTarget > zVal) {
-            zVal += 0.1f;
+            zVal += 0.05f;
         } else if (zTarget < zVal) {
-            zVal -= 0.1f;
+            zVal -= 0.05f;
         }
 
         // Calculate the angle to face the target
@@ -160,14 +162,18 @@ void Spacecraft::shoot() {
     }
 }
 
-void Spacecraft::takeDamage(int damage) {
+bool Spacecraft::takeDamage(int damage) {
     health -= damage;
     if (health <= 0) {
         health = 0;
         active = false;
-        std::cout << "Spacecraft destroyed!" << std::endl;
-        // Implement spacecraft destruction logic here
+        return true;
     }
+    if(!enemy){
+        score -= 10;
+        if(score <= 0) score = 0;
+    }
+    return false;
 }
 
 void Spacecraft::increaseHealth(int healthIncrease) {

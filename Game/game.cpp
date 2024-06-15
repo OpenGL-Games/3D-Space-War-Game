@@ -30,7 +30,7 @@ int currTime = 0;
 
 vector<Pickable *> pickables;
 
-int pickableGenerationInterval = 3000; // Generate new pickables every 10 seconds
+int pickableGenerationInterval = 7000; // Generate new pickables every 10 seconds
 
 int lastPickableGenerationTime = 0;
 
@@ -43,6 +43,7 @@ void generatePickables() {
     float z = static_cast<float>(rand() % 20 - 10);
     // float z = -10;
     int type = rand() % 2; // 0 for health, 1 for weapon strength
+//    int type = 0;
     pickables.push_back(new Pickable(x, y, z, type));
 }
 
@@ -62,6 +63,22 @@ void updatePickables() {
     }
 }
 
+void checkCollisionWithEnemies() {
+    for (auto &enemy: enemies) {
+        if (enemy->isActive()) {
+
+            float distance = sqrt(pow(spaceCraft->getX() - enemy->getX(), 2) +
+                                  pow(spaceCraft->getY() - enemy->getY(), 2) +
+                                  pow(spaceCraft->getZ() - enemy->getZ(), 2));
+            if (distance < 4.0f) { // Collision threshold
+                spaceCraft->deactivate();
+                cout << "Game Over!!!!!!!!!!!!!!!!!!!!" << endl;
+            }
+        }
+
+
+    }
+}
 
 void checkProjectileCollisions() {
     // Check collisions between enemy projectiles and player
@@ -73,7 +90,10 @@ void checkProjectileCollisions() {
                                           pow(spaceCraft->getY() - projectile.getY(), 2) +
                                           pow(spaceCraft->getZ() - projectile.getZ(), 2));
                     if (distance < 1.0f) { // Collision threshold
-                        spaceCraft->takeDamage(10); // Decrease player health
+                        bool isDied = spaceCraft->takeDamage(10); // Decrease player health
+                        if (isDied) {
+                            cout << "Game Over!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                        }
                         projectile.deactivate(); // Deactivate projectile
                     }
                 }
@@ -89,10 +109,10 @@ void checkProjectileCollisions() {
                     float distance = sqrt(pow(enemy->getX() - projectile.getX(), 2) +
                                           pow(enemy->getY() - projectile.getY(), 2) +
                                           pow(enemy->getZ() - projectile.getZ(), 2));
-                    if (distance < 1.0f) { // Collision threshold
-                        enemy->takeDamage(projectile.getStrength());
+                    if (distance < 2.0f) { // Collision threshold
+                        bool isDied = enemy->takeDamage(projectile.getStrength());
                         projectile.deactivate(); // Deactivate projectile
-                        spaceCraft->increaseScore(50); // Increase player score
+                        if (isDied) spaceCraft->increaseScore(100); // Increase player score
                         cout << "player attacked enemy" << endl;
                     }
                 }
@@ -110,9 +130,9 @@ void checkPickableCollisions() {
     for (auto &pickable: pickables) {
         if (pickable->isActive()) {
             float distance = sqrt(pow(spaceCraft->getX() - pickable->x, 2) +
-                                  pow(spaceCraft->getZ() - pickable->z, 2) + pow(pickable->y, 2));
+                                  pow(spaceCraft->getZ() - pickable->z, 2) + pow(spaceCraft->getY() - pickable->y, 2));
 
-            if (distance < 1.0) { // Collision threshold
+            if (distance < 2.0) { // Collision threshold
                 pickableSound();
 
                 if (pickable->type == 0) {
@@ -242,10 +262,12 @@ void updateEnemies() {
 
 // Function to draw all active projectiles
 void drawProjectiles() {
-    for (auto &projectile: spaceCraft->projectiles) {
-        if (projectile.isActive()) {
-            projectile.draw();
-            cout << "proj stren: " << projectile.getStrength() << endl;
+    if (spaceCraft->isActive()) {
+        for (auto &projectile: spaceCraft->projectiles) {
+            if (projectile.isActive()) {
+                projectile.draw();
+                cout << "proj stren: " << projectile.getStrength() << endl;
+            }
         }
     }
 
@@ -264,9 +286,11 @@ void drawProjectiles() {
 
 // Function to update all active projectiles
 void updateProjectiles(float dt) {
-    for (auto &projectile: spaceCraft->projectiles) {
-        if (projectile.isActive()) {
-            projectile.update(dt);
+    if (spaceCraft->isActive()) {
+        for (auto &projectile: spaceCraft->projectiles) {
+            if (projectile.isActive()) {
+                projectile.update(dt);
+            }
         }
     }
     for (auto &enemy: enemies) {
@@ -285,6 +309,7 @@ void Game::animate(int value = 0) {
     updateProjectiles(12);
     updateEnemies();
     checkProjectileCollisions();
+    checkCollisionWithEnemies();
     updatePickables();
     checkPickableCollisions();
     if (angle > 360) angle = 0;
@@ -300,7 +325,7 @@ void Game::animate(int value = 0) {
 }
 
 
-void solarSystemViewPort(int windowWidth, int windowHeight, int miniMapSize){
+void solarSystemViewPort(int windowWidth, int windowHeight, int miniMapSize) {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -320,7 +345,7 @@ void solarSystemViewPort(int windowWidth, int windowHeight, int miniMapSize){
     glVertex2f(windowWidth - miniMapSize - 10, 10);
     glVertex2f(windowWidth - 10, 10);
     glVertex2f(windowWidth - 10, miniMapSize + 10);
-    glVertex2f(windowWidth - miniMapSize - 10, miniMapSize  + 10);
+    glVertex2f(windowWidth - miniMapSize - 10, miniMapSize + 10);
     glEnd();
 
 
@@ -466,7 +491,7 @@ void Game::draw() {
     glVertex2f(windowWidth - miniMapSize - 10, 10);
     glVertex2f(windowWidth - 10, 10);
     glVertex2f(windowWidth - 10, miniMapSize + 10);
-    glVertex2f(windowWidth - miniMapSize - 10, miniMapSize  + 10);
+    glVertex2f(windowWidth - miniMapSize - 10, miniMapSize + 10);
     glEnd();
 
 
@@ -499,7 +524,7 @@ void Game::draw() {
     glScalef(2, 2, 2);
     Planet::drawPlanets(planets, angle);
 //    asteriods->draw();
-    drawPickables();
+//    drawPickables();
     // Spacecraft Setup and draw
     spaceCraft->setEnemy(false);
     spaceCraft->setup();

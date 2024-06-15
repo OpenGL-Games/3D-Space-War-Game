@@ -23,7 +23,7 @@ public:
     void move(float dx, float dz); // Method to move the spacecraft
     void rotate(float angle_change); // Method to rotate the spacecraft
     void shoot(); // Method to shoot projectiles
-    void takeDamage(int damage); // Method to decrease health
+    bool takeDamage(int damage); // Method to decrease health
     void increaseHealth(int healthIncrease); // Method to increase health
     void deactivate() { active = false; }
     void increaseScore(int val);
@@ -75,7 +75,7 @@ private:
 
     int lastShootTime; // Last shoot time in milliseconds
 
-    static const int shootInterval = 3000; // 3 seconds in milliseconds
+    static const int shootInterval = 6000;
 
 };
 
