@@ -53,18 +53,25 @@ void applyLighting(void) {
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 }
 
-void Planet::setup(void) {
+void Planet::init() {
     // Enable lighting
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0); // Enable light source 0
 
     glEnable(GL_DEPTH_TEST);
+
+    initTexture();
+
+    // Apply lighting only once here
+    applyLighting();
+
+}
+
+void Planet::setup(void) {
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY); // Enable normal array
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // Use GL_MODULATE for lighting effects
-
-
 
     // Set the array pointers.
     glVertexPointer(3, GL_FLOAT, 0, vertices);
@@ -74,12 +81,6 @@ void Planet::setup(void) {
     // Fill the vertex, texture coordinates, and normals arrays.
     fillVertexArray();
     fillTextureCoordArray();
-
-    // Initialize texture
-    initTexture();
-
-    // Apply lighting only once here
-    applyLighting();
 
     // Enable normal rescaling
     glEnable(GL_RESCALE_NORMAL); // Use GL_NORMALIZE if the normals are not unit length

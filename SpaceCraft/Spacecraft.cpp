@@ -9,35 +9,33 @@ Spacecraft::Spacecraft() {
     xVal = 0;
     zVal = -10;
     angle = 0;
-    health = 1000; // Initial health
+    health = 100; // Initial health
     score = 0;
     enemy = false;
     active = true;
     lastShootTime = 2;
 }
 
-Spacecraft::Spacecraft(unsigned int tex1, unsigned int tex2) {
-    texture[0] = tex1;
-    texture[1] = tex2;
+Spacecraft::Spacecraft(unsigned int tex) {
+    textureID = tex;
     xVal = 0;
     zVal = -10;
     angle = 0;
-    health = 1000; // Initial health
+    health = 100; // Initial health
     score = 0;
     enemy = false;
     active = true;
     lastShootTime = 2;
 }
 
-Spacecraft::Spacecraft(float x, float y, float z, float a, bool e, unsigned int tex1, unsigned int tex2) {
+Spacecraft::Spacecraft(float x, float y, float z, float a, bool e, unsigned int tex) {
     xVal = x;
     zVal = z;
     angle = a;
-    health = 1000; // Initial health
+    health = 100; // Initial health
     score = 0;
     enemy = e;
-    texture[0] = tex1;
-    texture[1] = tex2;
+    textureID = tex;
     active = true;
     lastShootTime = 2;
 }
@@ -79,11 +77,11 @@ void Spacecraft::draw() {
         glScalef(0.5f, 0.5f, 0.5f);
 
         // Map the texture onto the sphere.
-        glBindTexture(GL_TEXTURE_2D, texture[1]);
+        glBindTexture(GL_TEXTURE_2D, textureID);
 
     } else {
         // Map the texture onto the sphere.
-        glBindTexture(GL_TEXTURE_2D, texture[0]);
+        glBindTexture(GL_TEXTURE_2D, textureID);
     }
 
     // Draw base circle
@@ -218,6 +216,14 @@ void Spacecraft::fillTextureCoordArray(void) {
     textureCoordinates.push_back(1.0f);
 }
 
+void Spacecraft::init() {
+    if (enemy) {
+        loadTextures("..//Images//enemy.bmp", textureID);
+    } else {
+        loadTextures("..//Images//spacecraft.bmp", textureID);
+    }
+}
+
 void Spacecraft::setup() {
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -239,13 +245,7 @@ void Spacecraft::setup() {
 
     // enable depth test
     glEnable(GL_DEPTH_TEST);
-
-//     Load textures
-    if (enemy) {
-        loadTextures("..//Images//enemy.bmp", texture[1]);
-    } else {
-        loadTextures("..//Images//spacecraft.bmp", texture[0]);
-    }
+//     Load texture
 
 }
 

@@ -13,10 +13,9 @@ using namespace std;
 class Spacecraft {
 public:
     Spacecraft();
+    Spacecraft(unsigned int tex); // Constructor
 
-    Spacecraft(unsigned int tex1, unsigned int tex2); // Constructor
-
-    Spacecraft(float x, float y ,float z, float a,bool e, unsigned int tex1, unsigned int tex2);
+    Spacecraft(float x, float y ,float z, float a,bool e, unsigned int tex);
 
     void draw(); // Draw method
     void updateEnemy(float xTarget, float zTarget); // Update method for animation
@@ -28,6 +27,7 @@ public:
     void deactivate() { active = false; }
     void increaseScore(int val);
     void setup();
+    void init();
     // Getters
     float getX() const { return xVal; }
     float getZ() const { return zVal; }
@@ -48,7 +48,8 @@ public:
 
     void setEnemy(bool e) { enemy = e; }
     void setTextures(unsigned int tx1, unsigned int tx2) { text1 = tx1; text2 = tx2; }
-    unsigned int texture[2];
+//    unsigned int texture[2];
+    unsigned int textureID{};
     vector<Projectile> projectiles; // Vector to store projectiles
     bool isActive() const { return active; }
     int count;

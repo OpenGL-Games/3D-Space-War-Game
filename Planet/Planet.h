@@ -55,6 +55,8 @@ public:
 
     void setup(void);
 
+    void init();
+
     void static drawPlanets(Planet *planets, float angle);
 
 

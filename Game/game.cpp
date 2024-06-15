@@ -26,6 +26,7 @@ Planet *planets = nullptr;
 Asteriods *asteriods = nullptr;
 Spacecraft *spaceCraft = nullptr;
 vector<Spacecraft *> enemies;
+bool set = false;
 
 float angle = 0;
 float craftAngle = 0;
@@ -464,13 +465,13 @@ bool checkTimeAttackerWin() {
 
 void generateEnemies(unsigned int *texture) {
     // Add enemy spacecraft with different positions and angles
-    enemies.emplace_back(new Spacecraft(-25.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
-    enemies.emplace_back(new Spacecraft(25.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
-    enemies.emplace_back(new Spacecraft(-20.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
-    enemies.emplace_back(new Spacecraft(20.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
+    enemies.emplace_back(new Spacecraft(-25.0f, 0.0f, 10.0f, 0.0f, true, texture[11]));
+    enemies.emplace_back(new Spacecraft(25.0f, 0.0f, 10.0f, 0.0f, true, texture[11]));
+    enemies.emplace_back(new Spacecraft(-20.0f, 0.0f, 10.0f, 0.0f, true, texture[11]));
+    enemies.emplace_back(new Spacecraft(20.0f, 0.0f, 10.0f, 0.0f, true, texture[11]));
 
-    enemies.emplace_back(new Spacecraft(-15.0f, 0.0f, 0.0f, 0.0f, true, texture[9], texture[10]));
-    enemies.emplace_back(new Spacecraft(15.0f, 0.0f, 0.0f, 0.0f, true, texture[9], texture[10]));
+    enemies.emplace_back(new Spacecraft(-15.0f, 0.0f, 0.0f, 0.0f, true, texture[11]));
+    enemies.emplace_back(new Spacecraft(15.0f, 0.0f, 0.0f, 0.0f, true, texture[11]));
 //    enemies.emplace_back(new Spacecraft(-15.0f, 0.0f, 0.0f, 0.0f, true, texture[9], texture[10]));
 //    enemies.emplace_back(new Spacecraft(15.0f, 0.0f, 0.0f, 0.0f, true, texture[9], texture[10]));
 //    enemies.emplace_back(new Spacecraft(-15.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
@@ -484,6 +485,8 @@ void drawEnemies() {
 
     for (auto &enemy: enemies) {
         if (enemy->isActive()) {
+            if (!set)
+                enemy->init();
             enemy->setup();
             enemy->draw();
         }
@@ -676,6 +679,8 @@ void Game::draw() {
 
     // Space Craft Setup and draw
     spaceCraft->setEnemy(false);
+    if (!set)
+        spaceCraft->init();
     spaceCraft->setup();
 
 //    glPushMatrix();
@@ -687,11 +692,13 @@ void Game::draw() {
             if (isWin) {
                 drawWindow("WINNER!!! :))");
                 glutSwapBuffers();
+                set = true;
                 return;
             }
             if (isGameOver) {
                 drawWindow("GAME OVER!!!");
                 glutSwapBuffers();
+                set = true;
                 return;
             }
         }
@@ -709,7 +716,8 @@ void Game::draw() {
     for (int i = 0; i < 10; i++) {
         planets[i].textureID = texture[i];
         planets[i].planetName = planetNames[i];
-        planets[i].setup();
+        if (!set) planets[i].init();
+        planets->setup();
     }
     Planet::drawPlanets(planets, angle);
 
@@ -738,9 +746,6 @@ void Game::draw() {
         glPopMatrix();
     }
     glPopMatrix();
-
-
-
 
 
     // Set orthographic projection for HUD rendering
@@ -799,6 +804,7 @@ void Game::draw() {
 //    drawPickables();
     // Spacecraft Setup and draw
     spaceCraft->setEnemy(false);
+    if (!set) spaceCraft->init();
     spaceCraft->setup();
     glPushMatrix();
     glTranslatef(spaceCraft->getX(), 0.0, spaceCraft->getZ());
@@ -807,6 +813,7 @@ void Game::draw() {
     glPopMatrix();
 
     glPopMatrix();
+    set = true;
 
 
     glutSwapBuffers();
@@ -839,7 +846,7 @@ void Game::setup(void) {
     asteriods = new Asteriods();
 
     // spacecraft instance
-    spaceCraft = new Spacecraft(texture[10], texture[11]);
+    spaceCraft = new Spacecraft(texture[10]);
 
     generateEnemies(texture);
 
