@@ -167,6 +167,10 @@ void Planet::drawPlanets(Planet *planets, float angle) {
     vector<int> x = {0, 30, 50, 150, -90, -110, -130, 50, -150, 125};
     vector<int> z = {-150, -140, -110, -90, -70, -200, -210, -70, -50, -90};
 
+//    vector<int> x = {0, 30, 60, 120, -90, -110, -130, 50, -150, 125};
+//    vector<int> z = {-150, -140, -110, -70, -180, -210, -240, -100, -280, -70};
+
+
     // Orbital and rotational speeds (relative to some base speed)
     float orbitalSpeeds[] = {0.0f, 4.74f, 3.50f, 2.98f, 2.41f, 1.31f, 0.97f, 0.68f, 0.54f, 2.98f};
     float rotationalSpeeds[] = {0.0f, 10.83f, -6.52f, 1674.4f, 868.22f, 45583.0f, 36840.0f, -9320.0f, 9660.0f, 0.0f};
@@ -201,6 +205,7 @@ void Planet::drawPlanets(Planet *planets, float angle) {
 
 
     glPushMatrix();
+    glScalef(0.3, 0.3, 0.3);
 
     for (int i = 0; i < 10; i++) {
         glPushMatrix();
