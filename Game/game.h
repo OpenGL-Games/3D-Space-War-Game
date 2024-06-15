@@ -26,6 +26,7 @@ public:
     void specialKeyInput(int key, int x, int y);
 
     vector<string> planetNames = {"sun", "mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune", "moon"};
+    int x;
 
 private:
 

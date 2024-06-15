@@ -47,17 +47,14 @@ void Menu::draw(){
 void Menu::loadTextures()
 {
     // Local storage for image data.
-    imageFile *image[1];
-
-    // Load the image.
-    image[0] = getBMP("..//Images//background.bmp");
+    imageFile *image = getBMP("..//Images//background.bmp");
 
     // Create texture object texture[0].
     glBindTexture(GL_TEXTURE_2D, texture[0]);
 
     // Specify image data for currently active texture object.
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[0]->width, image[0]->height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, image[0]->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, image->data);
 
     // Set texture parameters for wrapping.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -66,6 +63,9 @@ void Menu::loadTextures()
     // Set texture parameters for filtering.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    delete image->data;
+    delete image;
 }
 
 void Menu::drawText(int x, int y, const char* text, bool selected) {

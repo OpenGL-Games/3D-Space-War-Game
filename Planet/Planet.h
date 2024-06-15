@@ -8,15 +8,20 @@ using namespace std;
 
 class Planet {
 public:
-    float *vertices = nullptr;
-    float *textureCoordinates = nullptr;
-    float *normals = nullptr; // Array for normals
+
+//    float *vertices = nullptr;
+//    float *textureCoordinates = nullptr;
+//    float *normals = nullptr; // Array for normals
     unsigned int textureID{};
     string planetName;
     int p = 200; // Number of grid columns.
     int q = 200; // Number of grid rows
     int R = 10;
     float angle = 0.0;
+
+    float *vertices = new float[3 * (p + 1) * (q + 1)];
+    float *textureCoordinates = new float[2 * (p + 1) * (q + 1)];
+    float *normals = new float[3 * (p + 1) * (q + 1)]; // Allocate memory for normals
 
     map<string, float> planetScales = {
             {"sun", 1.0f},

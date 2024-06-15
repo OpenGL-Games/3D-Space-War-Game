@@ -36,7 +36,7 @@ int currTime = 0;
 
 vector<Pickable *> pickables;
 
-int pickableGenerationInterval = 1000; // Generate new pickables every 10 seconds
+int pickableGenerationInterval = 6000; // Generate new pickables every 10 seconds
 
 int lastPickableGenerationTime = 0;
 
@@ -112,6 +112,10 @@ void loadWinSound() {
     PlaySound("..//Sounds//win.wav", nullptr, SND_ASYNC);
 }
 
+void loadEnemyEliminateSound() {
+    PlaySound("..//Sounds//enemy-eliminate.wav", nullptr, SND_ASYNC);
+}
+
 
 void gameOver() {
     spaceCraft->deactivate();
@@ -122,46 +126,6 @@ void gameOver() {
     loadGameOverSound();
     isGameOver = true;
     switchTimer = time(nullptr);
-//    cout << "Game Over!!!!!!!!!!!!!!!!!!!!" << endl;
-
-//    gameOverTimer = std::time(nullptr); // get current time
-
-//    std::this_thread::sleep_for(std::chrono::seconds(5)); // wait for 5 seconds
-//    windowChoice = 0;
-//    menu.setup();
-}
-
-tuple<float, float, float> getCurrentCoordinates(int planetNum) {
-
-    vector<int> x = {0, 30, 50, 150, -90, -110, -130, 50, -150, 125};
-    vector<int> z = {-150, -140, -110, -90, -70, -200, -210, -70, -50, -90};
-
-    // Orbital and rotational speeds (relative to some base speed)
-    float orbitalSpeeds[] = {0.0f, 4.74f, 3.50f, 2.98f, 2.41f, 1.31f, 0.97f, 0.68f, 0.54f, 2.98f};
-
-    // Calculate the current position based on the orbital angle
-    float currentAngle = angle * orbitalSpeeds[planetNum] * M_PI / 180.0f;
-    float currentX = x[planetNum] * cos(currentAngle) - z[planetNum] * sin(currentAngle);
-    float currentZ = x[planetNum] * sin(currentAngle) + z[planetNum] * cos(currentAngle);
-    return make_tuple(currentX, 0.0, currentZ);
-}
-
-void checkPlanetCollisionsWithSpacecraft() {
-    for (int i = 0; i < 9; ++i) {
-        Planet &planet = planets[i];
-        auto [planetX, planetY, planetZ] = getCurrentCoordinates(i);
-
-        float distance = sqrt(pow(spaceCraft->getX() - planetX, 2) +
-                              pow(spaceCraft->getZ() - planetZ, 2));
-
-//        cout << "distance : " << distance << endl;
-        if (distance < 10.0) { // Collision threshold
-            // game over
-//            cout << "Game Over!" << endl;
-//            deathSound();
-            exit(0);
-        }
-    }
 }
 
 void generatePickables() {
@@ -176,9 +140,11 @@ void generatePickables() {
 }
 
 void drawPickables() {
-    for (auto &pickable: pickables) {
-        if (pickable->isActive() && spaceCraft->isActive()) {
-            pickable->draw();
+    if (spaceCraft->isActive()) {
+        for (auto &pickable: pickables) {
+            if (pickable->isActive() && spaceCraft->isActive()) {
+                pickable->draw();
+            }
         }
     }
 }
@@ -211,13 +177,6 @@ void checkCollisionWithEnemies() {
                                   pow(spaceCraft->getY() - enemy->getY(), 2) +
                                   pow(spaceCraft->getZ() - enemy->getZ(), 2));
             if (distance < 4.0f) { // Collision threshold
-//                spaceCraft->deactivate();
-//                explosionX = spaceCraft->getX();
-//                explosionZ = spaceCraft->getZ();
-//                isExplosion = true;
-//                particleSystem.generateExplosion(0, 0.0, 0 );
-//                loadGameOverSound();
-//                cout << "Game Over!!!!!!!!!!!!!!!!!!!!" << endl;
                 gameOver();
             }
         }
@@ -228,6 +187,8 @@ void checkCollisionWithEnemies() {
 
 void checkProjectileCollisions() {
     // Check collisions between enemy projectiles and player
+    if (!spaceCraft->isActive()) return;
+
     for (auto &enemy: enemies) {
         if (enemy->isActive()) {
             for (auto &projectile: enemy->projectiles) {
@@ -238,12 +199,6 @@ void checkProjectileCollisions() {
                     if (distance < 2.0f) { // Collision threshold
                         bool isDied = spaceCraft->takeDamage(10); // Decrease player health
                         if (isDied) {
-//                            explosionX = spaceCraft->getX();
-//                            explosionZ = spaceCraft->getZ();
-//                            isExplosion = true;
-//                            particleSystem.generateExplosion(0, 0.0, 0 );
-//                            loadGameOverSound();
-//                            cout << "Game Over!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
                             gameOver();
                         }
                         projectile.deactivate(); // Deactivate projectile
@@ -274,7 +229,6 @@ void checkProjectileCollisions() {
                                 loadDeathSound();
                             }
                         }
-//                        cout << "player attacked enemy" << endl;
                     }
                 }
             }
@@ -282,14 +236,103 @@ void checkProjectileCollisions() {
     }
 }
 
+void getPlanetPosition(float angle, int planetIndex, float &xPos, float &yPos, float &zPos) {
+    vector<int> x = {0, 30, 50, 150, -90, -110, -130, 50, -150, 125};
+    vector<int> z = {-150, -140, -110, -90, -70, -200, -210, -70, -50, -90};
+
+
+    // Orbital and rotational speeds (relative to some base speed)
+    float orbitalSpeeds[] = {0.0f, 4.74f, 3.50f, 2.98f, 2.41f, 1.31f, 0.97f, 0.68f, 0.54f, 2.98f};
+
+    if (planetIndex < 0 || planetIndex >= 10) {
+        std::cerr << "Invalid planet index: " << planetIndex << std::endl;
+        return;
+    }
+    // Other planets: Rotate around the Sun
+    float orbitalAngle = angle * orbitalSpeeds[planetIndex] * (M_PI / 180.0f);
+
+    if (planetIndex == 0) {
+        // Sun's position
+        xPos = x[planetIndex] * 0.3;
+        zPos = z[planetIndex] * 0.3;
+    } else {
+//        glTranslatef(x[3] - x[0], 0, z[3] - z[0]); // Translate to Earth's position
+//        glRotatef(angle * orbitalSpeeds[i] * ORBITAL_SPEED_SCALE, 0, 1, 0); // Rotate around the Earth
+//        glTranslatef(x[i] - x[3], 0, z[i] - z[3]); // Translate to the Moon's orbit posit
+
+        if (planetIndex == 9) {
+//            xPos = x[planetIndex] - x[3];
+//            zPos = z[planetIndex] - z[3];
+
+            xPos = (x[planetIndex] - x[3]) * cos(orbitalAngle) + (z[planetIndex] - z[3]) * sin(orbitalAngle);
+            zPos = (x[planetIndex] - x[3]) * -sin(orbitalAngle) + (z[planetIndex] - z[3]) * cos(orbitalAngle);
+
+            xPos += x[3] - x[0];
+            zPos += z[3] - z[0];
+        }
+        xPos = (x[planetIndex] - x[0]) * cos(orbitalAngle) + (z[planetIndex] - z[0]) * sin(orbitalAngle);
+        zPos = (x[planetIndex] - x[0]) * -sin(orbitalAngle) + (z[planetIndex] - z[0]) * cos(orbitalAngle);
+
+        xPos += x[0];
+        zPos += z[0];
+
+        xPos *= 0.3f;
+        zPos *= 0.3f;
+    }
+}
+
+void checkPlanetCollisionsWithSpacecraft() {
+    for (int i = 0; i < 10 && spaceCraft->isActive(); ++i) {
+        float planetX, planetY, planetZ;
+        getPlanetPosition(angle, i, planetX, planetY, planetZ);
+
+        float distance = sqrt(pow(spaceCraft->getX() - planetX, 2) +
+                              pow(spaceCraft->getZ() - planetZ, 2));
+        if (distance < 5.0) { // Collision threshold
+            gameOver();
+        }
+    }
+}
+
+void checkPlanetEnemyCollision() {
+    if (!spaceCraft->isActive()) return;
+
+    for (auto &enemy: enemies) {
+        if (enemy->isActive()) {
+
+            for (int i = 0; i < 10; ++i) {
+                Planet &planet = planets[i];
+
+                float planetX, planetY, planetZ;
+                getPlanetPosition(angle, i, planetX, planetY, planetZ);
+
+                float distance = sqrt(pow(enemy->getX() - planetX, 2) +
+                                      pow(enemy->getZ() - planetZ, 2));
+
+                if (distance < 5.0) {
+                    enemy->deactivate();
+                    explosionX = enemy->getX();
+                    explosionZ = enemy->getZ();
+                    isExplosion = true;
+                    particleSystem.generateExplosion(0, 0.0, 0);
+                    loadEnemyEliminateSound();
+
+                }
+            }
+        }
+    }
+
+}
 
 void pickableSound() {
     PlaySound("..//Sounds//pickable-object.wav", nullptr, SND_ASYNC);
 }
 
 void checkPickableCollisions() {
+    if(!spaceCraft->isActive()) return;
+
     for (auto &pickable: pickables) {
-        if (pickable->isActive() && spaceCraft->isActive()) {
+        if (pickable->isActive()) {
             float distance = sqrt(pow(spaceCraft->getX() - pickable->x, 2) +
                                   pow(spaceCraft->getZ() - pickable->z, 2) + pow(spaceCraft->getY() - pickable->y, 2));
 
@@ -297,20 +340,14 @@ void checkPickableCollisions() {
                 pickableSound();
 
                 if (pickable->type == 0) {
-//                    cout << "health collision" << endl;
                     spaceCraft->increaseHealth(10); // Increase health
                 } else {
-//                    cout << "weapon collision" << endl;
-
-                    //instead update the power of the spacecraft and set strength when shooting
                     spaceCraft->increasePower(10);
-//                    for (auto &projectile: spaceCraft->projectiles) {
-//                        if (projectile.isActive()) {
-//                            projectile.increaseStrength(1);
-//                        }
-//                    }
                 }
                 pickable->active = false; // Deactivate pickable
+//                pickables.erase(pickables.begin() + i);
+//                delete pickable;
+
             }
         }
     }
@@ -394,18 +431,23 @@ void drawHUD() {
 bool checkSurvivalWin() {
     if (isRemainingEnemy() || menu.getSelectedOption() != 0) return false;
     if (isWin) return false;
+    if (!spaceCraft->isActive()) return false;
     loadWinSound();
     isWin = true;
     switchTimer = time(nullptr);
+    spaceCraft->deactivate();
     return true;
 }
 
 bool checkTimeAttackerWin() {
+    if (!spaceCraft->isActive()) return false;
+
     if (timeRemaining > 0) {
         if (!isRemainingEnemy() && !isWin) {
             loadWinSound();
             isWin = true;
             switchTimer = time(nullptr);
+            spaceCraft->deactivate();
             return true;
         }
     } else if (!isWin) {
@@ -422,11 +464,15 @@ bool checkTimeAttackerWin() {
 
 void generateEnemies(unsigned int *texture) {
     // Add enemy spacecraft with different positions and angles
-//    enemies.emplace_back(new Spacecraft(-10.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
-//    enemies.emplace_back(new Spacecraft(10.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
+    enemies.emplace_back(new Spacecraft(-25.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
+    enemies.emplace_back(new Spacecraft(25.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
     enemies.emplace_back(new Spacecraft(-20.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
-//    enemies.emplace_back(new Spacecraft(20.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
+    enemies.emplace_back(new Spacecraft(20.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
 
+    enemies.emplace_back(new Spacecraft(-15.0f, 0.0f, 0.0f, 0.0f, true, texture[9], texture[10]));
+    enemies.emplace_back(new Spacecraft(15.0f, 0.0f, 0.0f, 0.0f, true, texture[9], texture[10]));
+//    enemies.emplace_back(new Spacecraft(-15.0f, 0.0f, 0.0f, 0.0f, true, texture[9], texture[10]));
+//    enemies.emplace_back(new Spacecraft(15.0f, 0.0f, 0.0f, 0.0f, true, texture[9], texture[10]));
 //    enemies.emplace_back(new Spacecraft(-15.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
 //    enemies.emplace_back(new Spacecraft(15.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
 //    enemies.emplace_back(new Spacecraft(-25.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
@@ -434,6 +480,8 @@ void generateEnemies(unsigned int *texture) {
 }
 
 void drawEnemies() {
+    if(!spaceCraft->isActive()) return;
+
     for (auto &enemy: enemies) {
         if (enemy->isActive()) {
             enemy->setup();
@@ -443,6 +491,8 @@ void drawEnemies() {
 }
 
 void updateEnemies() {
+    if(!spaceCraft->isActive()) return;
+
     for (auto &enemy: enemies) {
         if (enemy->isActive()) {
             enemy->updateEnemy(spaceCraft->getX(), spaceCraft->getZ());
@@ -454,11 +504,12 @@ void updateEnemies() {
 
 // Function to draw all active projectiles
 void drawProjectiles() {
+    if(!spaceCraft->isActive()) return;
+
     if (spaceCraft->isActive()) {
         for (auto &projectile: spaceCraft->projectiles) {
             if (projectile.isActive()) {
                 projectile.draw();
-//                cout << "proj stren: " << projectile.getStrength() << endl;
             }
         }
     }
@@ -478,6 +529,8 @@ void drawProjectiles() {
 
 // Function to update all active projectiles
 void updateProjectiles(float dt) {
+    if(!spaceCraft->isActive()) return;
+
     if (spaceCraft->isActive()) {
         for (auto &projectile: spaceCraft->projectiles) {
             if (projectile.isActive()) {
@@ -506,6 +559,9 @@ void Game::animate(int value = 0) {
     checkPickableCollisions();
     if (menu.getSelectedOption() == 0) checkSurvivalWin();
     else if (menu.getSelectedOption() == 1) checkTimeAttackerWin();
+
+    checkPlanetCollisionsWithSpacecraft();
+    checkPlanetEnemyCollision();
 
 
 //    checkPlanetCollisionsWithSpacecraft();
@@ -579,10 +635,6 @@ void drawWindow(string str) {
 
 void Game::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-//    cout << "drawing game" << endl;
-//    if (checkSurvivalWin())
-//        return;
 
     int windowWidth = glutGet(GLUT_WINDOW_WIDTH);
     int windowHeight = glutGet(GLUT_WINDOW_HEIGHT);
@@ -757,8 +809,6 @@ void Game::draw() {
     glPopMatrix();
 
 
-
-
     glutSwapBuffers();
 }
 
@@ -812,7 +862,7 @@ void Game::keyInput(unsigned char key, int x, int y) {
             break;
             // Shoot
         case ' ': {
-            if(spaceCraft->isActive()){
+            if (spaceCraft->isActive()) {
                 spaceCraft->shoot();
 
                 shootSound();
@@ -834,8 +884,8 @@ void Game::specialKeyInput(int key, int x, int y) {
 
     // Compute next position.
 
-    if (key == GLUT_KEY_RIGHT) tempAngle = craftAngle + 8.0;
-    if (key == GLUT_KEY_LEFT) tempAngle = craftAngle - 8.0;
+    if (key == GLUT_KEY_RIGHT) tempAngle = craftAngle - 8.0;
+    if (key == GLUT_KEY_LEFT) tempAngle = craftAngle + 8.0;
     if (key == GLUT_KEY_DOWN) {
         tempxVal = spaceCraft->getX() - sin(craftAngle * M_PI / 180.0);
         tempzVal = spaceCraft->getZ() - cos(craftAngle * M_PI / 180.0);

@@ -9,7 +9,7 @@ Spacecraft::Spacecraft() {
     xVal = 0;
     zVal = -10;
     angle = 0;
-    health = 50; // Initial health
+    health = 1000; // Initial health
     score = 0;
     enemy = false;
     active = true;
@@ -22,7 +22,7 @@ Spacecraft::Spacecraft(unsigned int tex1, unsigned int tex2) {
     xVal = 0;
     zVal = -10;
     angle = 0;
-    health = 50; // Initial health
+    health = 1000; // Initial health
     score = 0;
     enemy = false;
     active = true;
@@ -33,7 +33,7 @@ Spacecraft::Spacecraft(float x, float y, float z, float a, bool e, unsigned int 
     xVal = x;
     zVal = z;
     angle = a;
-    health = 50; // Initial health
+    health = 1000; // Initial health
     score = 0;
     enemy = e;
     texture[0] = tex1;
@@ -112,14 +112,14 @@ void Spacecraft::updateEnemy(float xTarget, float zTarget) {
         return;
     if (enemy) {
         if (xTarget > xVal) {
-            xVal += 0.01f;
+            xVal += 0.1f;
         } else if (xTarget < xVal) {
-            xVal -= 0.01f;
+            xVal -= 0.1f;
         }
         if (zTarget > zVal) {
-            zVal += 0.01f;
+            zVal += 0.1f;
         } else if (zTarget < zVal) {
-            zVal -= 0.01f;
+            zVal -= 0.1f;
         }
 
         // Calculate the angle to face the target
