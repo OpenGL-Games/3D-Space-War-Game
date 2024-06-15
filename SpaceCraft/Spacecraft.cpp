@@ -186,10 +186,10 @@ void Spacecraft::setup() {
 
 //     Load textures
     if (enemy) {
-        loadTextures("..//Images//enemy.bmp", texture[1]);
+        loadTextures("Images//enemy.bmp", texture[1]);
     }
     else {
-        loadTextures("..//Images//spacecraft.bmp", texture[0]);
+        loadTextures("Images//spacecraft.bmp", texture[0]);
     }
 }
 

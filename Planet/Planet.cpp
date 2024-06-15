@@ -35,10 +35,8 @@ void loadTextures(std::string file, unsigned int t) {
     delete image;
 }
 
-
-
 void Planet::initTexture() {
-    loadTextures("..//Images//Planets//" + planetName + ".bmp", textureID);
+    loadTextures("Images//Planets//" + planetName + ".bmp", textureID);
 }
 
 void applyLighting(void) {

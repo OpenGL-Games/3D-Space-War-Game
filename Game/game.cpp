@@ -11,6 +11,8 @@
 #include "../Pickable/Pickable.h"
 #include <vector>
 #include <ctime>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -58,8 +60,27 @@ void updatePickables() {
     }
 }
 
+tuple<float, float, float> getCurrentCoordinates(int planetNum){
+
+    vector<int> x = {0, 30, 50, 150, -90, -110, -130, 50, -150, 125};
+    vector<int> z = {-150, -140, -110, -90, -70, -200, -210, -70, -50, -90};
+
+    // Orbital and rotational speeds (relative to some base speed)
+    float orbitalSpeeds[] = {0.0f, 4.74f, 3.50f, 2.98f, 2.41f, 1.31f, 0.97f, 0.68f, 0.54f, 2.98f};
+    
+    // Calculate the current position based on the orbital angle
+    float currentAngle = angle * orbitalSpeeds[planetNum] * M_PI / 180.0f;
+    float currentX = x[planetNum] * cos(currentAngle) - z[planetNum] * sin(currentAngle);
+    float currentZ = x[planetNum] * sin(currentAngle) + z[planetNum] * cos(currentAngle);
+    return make_tuple(currentX, 0.0, currentZ);
+}
+
+
 void pickableSound() {
-    PlaySound("..//Sounds//pickable-object.wav", nullptr, SND_ASYNC);
+    PlaySound("Sounds//pickable-object.wav", nullptr, SND_ASYNC);
+}
+void deathSound() {
+    PlaySound("Sounds//game-over.wav", nullptr, SND_ASYNC);
 }
 void checkPickableCollisions() {
     for (auto &pickable: pickables) {
@@ -88,6 +109,46 @@ void checkPickableCollisions() {
         }
     }
 }
+
+
+void checkPlanetCollisionsWithSpacecraft() {
+    for (int i = 0; i < 9; ++i) {
+        Planet &planet = planets[i];
+        auto [planetX, planetY, planetZ] = getCurrentCoordinates(i);
+
+        float distance = sqrt(pow(spaceCraft->getX() - planetX, 2) +
+                              pow(spaceCraft->getZ() - planetZ, 2));
+
+        cout<<"distance : "<<distance<<endl;
+        if (distance < 10.0) { // Collision threshold
+            // game over
+            cout << "Game Over!" << endl;
+            deathSound();
+            exit(0);
+        }
+    }
+}
+
+// void checkPlanetCollisionsWithEnemies() {
+//     for (auto &enemy : enemies) {
+//         if (!enemy->isActive()) continue;
+
+//         for (int i = 0; i < 9; ++i) {
+//             Planet &planet = planets[i];
+
+//             float distance = sqrt(pow(enemy->getX() - planet.getX(), 2) +
+//                                   pow(enemy->getZ() - planet.getZ(), 2));
+
+//             float collisionThreshold = planet.getRadius() + enemy.getRadius();
+
+//             if (distance < collisionThreshold) {
+//                 // Handle collision: deactivate enemy or take other actions
+//                 enemy->deactivate();
+//                 std::cout << "Collision detected between enemy spacecraft and planet: " << planet.planetName << std::endl;
+//             }
+//         }
+//     }
+// }
 
 
 void drawFrame(float x, float y, float width, float height) {
@@ -186,6 +247,7 @@ void Game::animate(int value = 0) {
     updateProjectiles(12);
     updatePickables();
     checkPickableCollisions();
+    checkPlanetCollisionsWithSpacecraft();
     if (angle > 360) angle = 0;
 
     int currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -296,7 +358,7 @@ void Game::setup(void) {
 }
 
 void shootSound() {
-    PlaySound("..//Sounds//shoot.wav", nullptr, SND_ASYNC);
+    PlaySound("Sounds//shoot.wav", nullptr, SND_ASYNC);
 }
 
 // handle ESC and Shoot
