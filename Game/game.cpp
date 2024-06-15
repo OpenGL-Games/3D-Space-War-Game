@@ -369,14 +369,11 @@ void solarSystemViewPort(int windowWidth, int windowHeight, int miniMapSize){
 
 void Game::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
     int windowWidth = glutGet(GLUT_WINDOW_WIDTH);
     int windowHeight = glutGet(GLUT_WINDOW_HEIGHT);
     int miniMapSize = windowHeight / 2.5; // Size of the mini map (1/4 of window height)
-
-    glViewport(0, 0, windowWidth, windowHeight); // Adjust to the full window size
-    glMatrixMode(GL_MODELVIEW);
-
-    glLoadIdentity();
 
     // Retrieve spacecraft position and orientation
     float spaceCraftX = spaceCraft->getX();
@@ -397,6 +394,10 @@ void Game::draw() {
     float lookAtZ = spaceCraftZ;
     float lookAtY = 0.0;  // Look-at height (ground level)
 
+    glViewport(0, 0, windowWidth, windowHeight); // Adjust to the full window size
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
     // Set the camera position and look-at point using gluLookAt
     gluLookAt(
             cameraX, cameraY + 5, cameraZ, // Camera position
@@ -412,8 +413,13 @@ void Game::draw() {
     spaceCraft->setEnemy(false);
     spaceCraft->setup();
 
+    glPushMatrix();
+    glTranslatef(spaceCraft->getX(), 0.0, spaceCraft->getZ());
+    glRotatef(spaceCraft->getAngle(), 0.0, 1.0, 0.0);
     spaceCraft->draw();
+    glPopMatrix();
 
+    drawProjectiles();
 
     drawEnemies();
 
@@ -439,14 +445,79 @@ void Game::draw() {
 
     glPopMatrix();
 
-    solarSystemViewPort(windowWidth, windowHeight, miniMapSize);
+
+    // Set orthographic projection for HUD rendering
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, windowWidth, 0, windowHeight); // Adjust to your window size
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Disable depth testing for HUD rendering
+    glDisable(GL_DEPTH_TEST);
+
+
+    glLineWidth(2.0);
+    glColor3f(1.0, 1.0, 0.0); // Set color to yellow
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(windowWidth - miniMapSize - 10, 10);
+    glVertex2f(windowWidth - 10, 10);
+    glVertex2f(windowWidth - 10, miniMapSize + 10);
+    glVertex2f(windowWidth - miniMapSize - 10, miniMapSize  + 10);
+    glEnd();
+
+
+    // Restore previous state
+    glEnable(GL_DEPTH_TEST);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    // end of main viewport
+
+    // Second viewport for mini-map
+    glViewport(windowWidth - miniMapSize - 10, 10, miniMapSize, miniMapSize); // 10 pixel padding
+    glLoadIdentity();
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    // Set up camera for the mini-map view (top-down view)
+    gluLookAt(
+            0.0, 50.0, -200.0, // Camera position above the origin
+            0.0, 0.0, -150,     // Look-at point at the origin
+            0.0, 1.0, 0.0      // Up vector (looking down)
+    );
+
+
+    // Draw the entire scene for the mini-map view
+    glPushMatrix();
+    glScalef(2, 2, 2);
+    Planet::drawPlanets(planets, angle);
+//    asteriods->draw();
+    drawPickables();
+    // Spacecraft Setup and draw
+    spaceCraft->setEnemy(false);
+    spaceCraft->setup();
+    glPushMatrix();
+    glTranslatef(spaceCraft->getX(), 0.0, spaceCraft->getZ());
+    glRotatef(spaceCraft->getAngle(), 0.0, 1.0, 0.0);
+    spaceCraft->draw();
+    glPopMatrix();
+
+    glPopMatrix();
+
 
     glutSwapBuffers();
 }
 
 
 void Game::resize(int w, int h) {
-    glViewport(0, 0, w, h);
+//    glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustum(-5.0, 5.0, -5.0, 5.0, 5.0, 250.0);
