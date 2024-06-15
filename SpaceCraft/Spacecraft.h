@@ -35,6 +35,7 @@ public:
     float getAngle() const { return angle; }
     int getHealth() const { return health; }
     int getScore() const { return score; }
+    int getPower() const { return power; }
     bool isEnemy() const { return enemy; }
     // Setters
     void setX(float x) { xVal = x; }
@@ -42,6 +43,8 @@ public:
     void setAngle(float a) { angle = a; }
     void setHealth(int h) { health = h; }
     void setScore(int s) { score = s; }
+    void setPower(int p) { power = p; }
+    void increasePower(int val) {power += val; }
 
     void setEnemy(bool e) { enemy = e; }
     void setTextures(unsigned int tx1, unsigned int tx2) { text1 = tx1; text2 = tx2; }
@@ -65,6 +68,7 @@ private:
     int score;
     bool enemy;
     bool active;
+    int power = 1;
     unsigned int spacecraftModel; // Display list for the spacecraft model
     unsigned int text1;
     unsigned int text2;
