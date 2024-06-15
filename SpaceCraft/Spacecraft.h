@@ -75,7 +75,7 @@ private:
 
     int lastShootTime; // Last shoot time in milliseconds
 
-    static const int shootInterval = 6000;
+    static const int shootInterval = 30000;
 
 };
 

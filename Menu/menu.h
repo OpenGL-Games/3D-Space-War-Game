@@ -11,6 +11,7 @@ public:
     void setup(void);
     void keyInput(unsigned char key, int x, int y);
     void specialKeyInput(int key, int x, int y);
+    int getSelectedOption() const {return selectedOption;}
 
 private:
 

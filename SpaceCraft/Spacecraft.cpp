@@ -112,14 +112,14 @@ void Spacecraft::updateEnemy(float xTarget, float zTarget) {
         return;
     if (enemy) {
         if (xTarget > xVal) {
-            xVal += 0.1f;
+            xVal += 0.01f;
         } else if (xTarget < xVal) {
-            xVal -= 0.1f;
+            xVal -= 0.01f;
         }
         if (zTarget > zVal) {
-            zVal += 0.1f;
+            zVal += 0.01f;
         } else if (zTarget < zVal) {
-            zVal -= 0.1f;
+            zVal -= 0.01f;
         }
 
         // Calculate the angle to face the target

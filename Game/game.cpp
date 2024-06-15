@@ -36,15 +36,16 @@ int currTime = 0;
 
 vector<Pickable *> pickables;
 
-int pickableGenerationInterval = 7000; // Generate new pickables every 10 seconds
+int pickableGenerationInterval = 1000; // Generate new pickables every 10 seconds
 
 int lastPickableGenerationTime = 0;
 
 float explosionX = 0.0f, explosionZ = 0.0f;
 bool isExplosion = false;
 float explosionRadius = 0.0f, explosionMaxRadius = 8.0f;
-std::time_t gameOverTimer;
+std::time_t switchTimer;
 bool isGameOver = false;
+bool isWin = false;
 
 
 struct Particle {
@@ -97,47 +98,6 @@ public:
 
 ParticleSystem particleSystem; // Instance of ParticleSystem
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Game::Game() = default;
 
 void loadGameOverSound() {
@@ -148,6 +108,11 @@ void loadDeathSound() {
     PlaySound("..//Sounds//death.wav", nullptr, SND_ASYNC);
 }
 
+void loadWinSound() {
+    PlaySound("..//Sounds//win.wav", nullptr, SND_ASYNC);
+}
+
+
 void gameOver() {
     spaceCraft->deactivate();
     explosionX = spaceCraft->getX();
@@ -156,7 +121,8 @@ void gameOver() {
     particleSystem.generateExplosion(0, 0.0, 0);
     loadGameOverSound();
     isGameOver = true;
-    cout << "Game Over!!!!!!!!!!!!!!!!!!!!" << endl;
+    switchTimer = time(nullptr);
+//    cout << "Game Over!!!!!!!!!!!!!!!!!!!!" << endl;
 
 //    gameOverTimer = std::time(nullptr); // get current time
 
@@ -191,7 +157,7 @@ void checkPlanetCollisionsWithSpacecraft() {
 //        cout << "distance : " << distance << endl;
         if (distance < 10.0) { // Collision threshold
             // game over
-            cout << "Game Over!" << endl;
+//            cout << "Game Over!" << endl;
 //            deathSound();
             exit(0);
         }
@@ -211,18 +177,30 @@ void generatePickables() {
 
 void drawPickables() {
     for (auto &pickable: pickables) {
-        if (pickable->isActive()) {
+        if (pickable->isActive() && spaceCraft->isActive()) {
             pickable->draw();
         }
     }
 }
 
 void updatePickables() {
-    for (auto &pickable: pickables) {
-        if (pickable->isActive()) {
-            pickable->update();
+    if (spaceCraft->isActive()) {
+        for (auto &pickable: pickables) {
+            if (pickable->isActive()) {
+                pickable->update();
+            }
         }
     }
+}
+
+bool isRemainingEnemy() {
+    int rem = 0;
+    for (auto &enemy: enemies) {
+        if (enemy->isActive()) {
+            rem++;
+        }
+    }
+    return rem > 0;
 }
 
 void checkCollisionWithEnemies() {
@@ -257,7 +235,7 @@ void checkProjectileCollisions() {
                     float distance = sqrt(pow(spaceCraft->getX() - projectile.getX(), 2) +
                                           pow(spaceCraft->getY() - projectile.getY(), 2) +
                                           pow(spaceCraft->getZ() - projectile.getZ(), 2));
-                    if (distance < 1.0f) { // Collision threshold
+                    if (distance < 2.0f) { // Collision threshold
                         bool isDied = spaceCraft->takeDamage(10); // Decrease player health
                         if (isDied) {
 //                            explosionX = spaceCraft->getX();
@@ -292,9 +270,11 @@ void checkProjectileCollisions() {
                             explosionZ = enemy->getZ();
                             isExplosion = true;
                             particleSystem.generateExplosion(0, 0.0, 0);
-                            loadDeathSound();
+                            if (isRemainingEnemy()) {
+                                loadDeathSound();
+                            }
                         }
-                        cout << "player attacked enemy" << endl;
+//                        cout << "player attacked enemy" << endl;
                     }
                 }
             }
@@ -309,7 +289,7 @@ void pickableSound() {
 
 void checkPickableCollisions() {
     for (auto &pickable: pickables) {
-        if (pickable->isActive()) {
+        if (pickable->isActive() && spaceCraft->isActive()) {
             float distance = sqrt(pow(spaceCraft->getX() - pickable->x, 2) +
                                   pow(spaceCraft->getZ() - pickable->z, 2) + pow(spaceCraft->getY() - pickable->y, 2));
 
@@ -317,10 +297,10 @@ void checkPickableCollisions() {
                 pickableSound();
 
                 if (pickable->type == 0) {
-                    cout << "health collision" << endl;
+//                    cout << "health collision" << endl;
                     spaceCraft->increaseHealth(10); // Increase health
                 } else {
-                    cout << "weapon collision" << endl;
+//                    cout << "weapon collision" << endl;
 
                     //instead update the power of the spacecraft and set strength when shooting
                     spaceCraft->increasePower(10);
@@ -386,18 +366,20 @@ void drawHUD() {
     drawFrame(590, 540, 150, 30);
 
     // Draw time remaining with fancy frame
-    glRasterPos2f(600, 520);
-    string timeText = "Time: " + to_string((int) timeRemaining);
+    if (menu.getSelectedOption() == 1) {
+        glRasterPos2f(600, 520);
+        string timeText = "Time: " + to_string((int) timeRemaining);
 
-    // Decrease time remaining
-    timeRemaining -= (static_cast<int>(time(nullptr)) - currTime);
-    currTime = static_cast<int>(time(nullptr));
-    if (timeRemaining < 0) timeRemaining = 0; // Ensure it doesn't go below 0
+        // Decrease time remaining
+        timeRemaining -= (static_cast<int>(time(nullptr)) - currTime);
+        currTime = static_cast<int>(time(nullptr));
+        if (timeRemaining < 0) timeRemaining = 0; // Ensure it doesn't go below 0
 
-    for (char c: timeText) {
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+        for (char c: timeText) {
+            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+        }
+        drawFrame(590, 510, 150, 30);
     }
-    drawFrame(590, 510, 150, 30);
 
     // Restore previous state
     glEnable(GL_DEPTH_TEST);
@@ -409,17 +391,46 @@ void drawHUD() {
     glPopMatrix();
 }
 
+bool checkSurvivalWin() {
+    if (isRemainingEnemy() || menu.getSelectedOption() != 0) return false;
+    if (isWin) return false;
+    loadWinSound();
+    isWin = true;
+    switchTimer = time(nullptr);
+    return true;
+}
+
+bool checkTimeAttackerWin() {
+    if (timeRemaining > 0) {
+        if (!isRemainingEnemy() && !isWin) {
+            loadWinSound();
+            isWin = true;
+            switchTimer = time(nullptr);
+            return true;
+        }
+    } else if (!isWin) {
+        //game over
+        if (!isGameOver) {
+            spaceCraft->deactivate();
+            loadGameOverSound();
+            isGameOver = true;
+            switchTimer = time(nullptr);
+        }
+    }
+    return false;
+}
+
 void generateEnemies(unsigned int *texture) {
     // Add enemy spacecraft with different positions and angles
 //    enemies.emplace_back(new Spacecraft(-10.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
 //    enemies.emplace_back(new Spacecraft(10.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
     enemies.emplace_back(new Spacecraft(-20.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
-    enemies.emplace_back(new Spacecraft(20.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
+//    enemies.emplace_back(new Spacecraft(20.0f, 0.0f, 10.0f, 0.0f, true, texture[9], texture[10]));
 
 //    enemies.emplace_back(new Spacecraft(-15.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
 //    enemies.emplace_back(new Spacecraft(15.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
-    enemies.emplace_back(new Spacecraft(-25.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
-    enemies.emplace_back(new Spacecraft(25.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
+//    enemies.emplace_back(new Spacecraft(-25.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
+//    enemies.emplace_back(new Spacecraft(25.0f, 0.0f, -20.0f, 0.0f, true, texture[9], texture[10]));
 }
 
 void drawEnemies() {
@@ -447,7 +458,7 @@ void drawProjectiles() {
         for (auto &projectile: spaceCraft->projectiles) {
             if (projectile.isActive()) {
                 projectile.draw();
-                cout << "proj stren: " << projectile.getStrength() << endl;
+//                cout << "proj stren: " << projectile.getStrength() << endl;
             }
         }
     }
@@ -493,6 +504,9 @@ void Game::animate(int value = 0) {
     checkCollisionWithEnemies();
     updatePickables();
     checkPickableCollisions();
+    if (menu.getSelectedOption() == 0) checkSurvivalWin();
+    else if (menu.getSelectedOption() == 1) checkTimeAttackerWin();
+
 
 //    checkPlanetCollisionsWithSpacecraft();
 
@@ -527,10 +541,48 @@ void Game::animate(int value = 0) {
     glutTimerFunc(animationPeriod, animate, value);
 }
 
+void drawWindow(string str) {
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 800, 0, 600); // Adjust to your window size
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Disable depth testing for HUD rendering
+    glDisable(GL_DEPTH_TEST);
+
+    // Draw score with frame
+    glClearColor(0.9f, 0.8f, 0.8f, 0.0);
+    glColor3f(0.0f, 1.0f, 0.0f);
+    drawFrame(300, 350, 200, 30);
+
+    glRasterPos2f(355, 360);
+    string scoreText = str;
+    for (char c: scoreText) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+
+
+
+    // Restore previous state
+    glEnable(GL_DEPTH_TEST);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+}
+
 void Game::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    cout << "drawing game" << endl;
+//    cout << "drawing game" << endl;
+//    if (checkSurvivalWin())
+//        return;
 
     int windowWidth = glutGet(GLUT_WINDOW_WIDTH);
     int windowHeight = glutGet(GLUT_WINDOW_HEIGHT);
@@ -577,8 +629,23 @@ void Game::draw() {
 //    glPushMatrix();
 //    glTranslatef(spaceCraft->getX(), 0.0, spaceCraft->getZ());
 //    glRotatef(spaceCraft->getAngle(), 0.0, 1.0, 0.0);
+    if (isWin || isGameOver) {
+        std::time_t currentTime = std::time(nullptr);
+        if (std::difftime(currentTime, switchTimer) >= 3) {
+            if (isWin) {
+                drawWindow("WINNER!!! :))");
+                glutSwapBuffers();
+                return;
+            }
+            if (isGameOver) {
+                drawWindow("GAME OVER!!!");
+                glutSwapBuffers();
+                return;
+            }
+        }
+    }
     spaceCraft->draw();
-//    glPopMatrix();
+    //    glPopMatrix();
 
     drawProjectiles();
 
@@ -605,11 +672,11 @@ void Game::draw() {
     drawHUD();
     // Draw explosion
     if (isExplosion) {
-//        glPushMatrix();
-//        glTranslatef(explosionX, 0.0, explosionZ);
-//        glColor3f(1.0, 0.0, 0.0);
-//        glutSolidSphere(explosionRadius, 20, 20);
-//        glPopMatrix();
+        //        glPushMatrix();
+        //        glTranslatef(explosionX, 0.0, explosionZ);
+        //        glColor3f(1.0, 0.0, 0.0);
+        //        glutSolidSphere(explosionRadius, 20, 20);
+        //        glPopMatrix();
 
         glPushMatrix();
         glTranslatef(explosionX, 0.0, explosionZ);
@@ -618,8 +685,10 @@ void Game::draw() {
         particleSystem.draw();
         glPopMatrix();
     }
-
     glPopMatrix();
+
+
+
 
 
     // Set orthographic projection for HUD rendering
@@ -655,17 +724,6 @@ void Game::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
-
-//    std::time_t currentTime = std::time(nullptr);
-//
-//    // loop until 5 seconds have passed
-//    if (isGameOver && std::difftime(currentTime, gameOverTimer) >= 5){
-//        windowChoice = 0;
-//        glViewport(0, 0, windowWidth, windowHeight); // Adjust to the full window size
-//        menu.setup();
-//        menu.draw();
-//    }else{
-
     // end of main viewport
 
     // Second viewport for mini-map
@@ -697,7 +755,6 @@ void Game::draw() {
     glPopMatrix();
 
     glPopMatrix();
-//    }
 
 
 
@@ -755,10 +812,12 @@ void Game::keyInput(unsigned char key, int x, int y) {
             break;
             // Shoot
         case ' ': {
-            spaceCraft->shoot();
+            if(spaceCraft->isActive()){
+                spaceCraft->shoot();
 
-            shootSound();
-            glutPostRedisplay();
+                shootSound();
+                glutPostRedisplay();
+            }
 
             break;
         }
