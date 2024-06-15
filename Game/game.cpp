@@ -30,7 +30,7 @@ int currTime = 0;
 
 vector<Pickable *> pickables;
 
-int pickableGenerationInterval = 10000; // Generate new pickables every 10 seconds
+int pickableGenerationInterval = 3000; // Generate new pickables every 10 seconds
 
 int lastPickableGenerationTime = 0;
 
@@ -39,7 +39,7 @@ Game::Game() = default;
 void generatePickables() {
     float x = static_cast<float>(rand() % 20 - 10);
     // float x = 0;
-    float y = 20.0f; // Start from the top
+    float y = 0.0f; // Start from the top
     float z = static_cast<float>(rand() % 20 - 10);
     // float z = -10;
     int type = rand() % 2; // 0 for health, 1 for weapon strength
@@ -121,11 +121,13 @@ void checkPickableCollisions() {
                 } else {
                     cout << "weapon collision" << endl;
 
-                    for (auto &projectile: spaceCraft->projectiles) {
-                        if (projectile.isActive()) {
-                            projectile.increaseStrength(1);
-                        }
-                    }
+                    //instead update the power of the spacecraft and set strength when shooting
+                    spaceCraft->increasePower(10);
+//                    for (auto &projectile: spaceCraft->projectiles) {
+//                        if (projectile.isActive()) {
+//                            projectile.increaseStrength(1);
+//                        }
+//                    }
                 }
                 pickable->active = false; // Deactivate pickable
             }
@@ -243,6 +245,7 @@ void drawProjectiles() {
     for (auto &projectile: spaceCraft->projectiles) {
         if (projectile.isActive()) {
             projectile.draw();
+            cout << "proj stren: " << projectile.getStrength() << endl;
         }
     }
 
@@ -251,6 +254,7 @@ void drawProjectiles() {
             for (auto &projectile: enemy->projectiles) {
                 if (projectile.isActive()) {
                     projectile.draw();
+
                 }
             }
         }
@@ -295,8 +299,83 @@ void Game::animate(int value = 0) {
     glutTimerFunc(animationPeriod, animate, value);
 }
 
+
+void solarSystemViewPort(int windowWidth, int windowHeight, int miniMapSize){
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, windowWidth, 0, windowHeight); // Adjust to your window size
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Disable depth testing for HUD rendering
+    glDisable(GL_DEPTH_TEST);
+
+
+    glLineWidth(2.0);
+    glColor3f(1.0, 1.0, 0.0); // Set color to yellow
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(windowWidth - miniMapSize - 10, 10);
+    glVertex2f(windowWidth - 10, 10);
+    glVertex2f(windowWidth - 10, miniMapSize + 10);
+    glVertex2f(windowWidth - miniMapSize - 10, miniMapSize  + 10);
+    glEnd();
+
+
+    // Restore previous state
+    glEnable(GL_DEPTH_TEST);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    // end of main viewport
+
+    // Second viewport for mini-map
+    glViewport(windowWidth - miniMapSize - 10, 10, miniMapSize, miniMapSize); // 10 pixel padding
+    glLoadIdentity();
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    // Set up camera for the mini-map view (top-down view)
+    gluLookAt(
+            0.0, 50.0, -200.0, // Camera position above the origin
+            0.0, 0.0, -150,     // Look-at point at the origin
+            0.0, 1.0, 0.0      // Up vector (looking down)
+    );
+
+
+    // Draw the entire scene for the mini-map view
+    glPushMatrix();
+    glScalef(2, 2, 2);
+    Planet::drawPlanets(planets, angle);
+//    asteriods->draw();
+    drawPickables();
+    // Spacecraft Setup and draw
+    spaceCraft->setEnemy(false);
+    spaceCraft->setup();
+    glPushMatrix();
+    glTranslatef(spaceCraft->getX(), 0.0, spaceCraft->getZ());
+    glRotatef(spaceCraft->getAngle(), 0.0, 1.0, 0.0);
+    spaceCraft->draw();
+    glPopMatrix();
+
+    glPopMatrix();
+
+}
+
 void Game::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    int windowWidth = glutGet(GLUT_WINDOW_WIDTH);
+    int windowHeight = glutGet(GLUT_WINDOW_HEIGHT);
+    int miniMapSize = windowHeight / 2.5; // Size of the mini map (1/4 of window height)
+
+    glViewport(0, 0, windowWidth, windowHeight); // Adjust to the full window size
+    glMatrixMode(GL_MODELVIEW);
+
     glLoadIdentity();
 
     // Retrieve spacecraft position and orientation
@@ -320,7 +399,7 @@ void Game::draw() {
 
     // Set the camera position and look-at point using gluLookAt
     gluLookAt(
-            cameraX, cameraY, cameraZ, // Camera position
+            cameraX, cameraY + 5, cameraZ, // Camera position
             lookAtX, lookAtY, lookAtZ, // Look-at point
             0.0, 1.0, 0.0              // Up vector
     );
@@ -359,8 +438,12 @@ void Game::draw() {
     drawHUD();
 
     glPopMatrix();
+
+    solarSystemViewPort(windowWidth, windowHeight, miniMapSize);
+
     glutSwapBuffers();
 }
+
 
 void Game::resize(int w, int h) {
     glViewport(0, 0, w, h);

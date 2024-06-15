@@ -58,10 +58,10 @@ void Pickable::draw() {
 
 void Pickable::update() {
     if (active) {
-        y -= 0.1f; // Move downwards
-        if (y < -10.0f) {
-            active = false; // Deactivate if it goes out of screen
-        }
+//        y -= 0.1f; // Move downwards
+//        if (y < -10.0f) {
+//            active = false; // Deactivate if it goes out of screen
+//        }
     }
 }
 

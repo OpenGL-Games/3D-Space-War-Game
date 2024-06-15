@@ -142,28 +142,28 @@ void Spacecraft::rotate(float angle_change) {
 }
 
 void Spacecraft::shoot() {
-    int currentTime = glutGet(GLUT_ELAPSED_TIME);
-    if (currentTime - lastShootTime >= shootInterval) {
-        float directionX = sin(angle * M_PI / 180.0);
-        float directionZ = cos(angle * M_PI / 180.0);
-
-        if (enemy) {
+    float directionX = sin(angle * M_PI / 180.0);
+    float directionZ = cos(angle * M_PI / 180.0);
+    if(enemy){
+        int currentTime = glutGet(GLUT_ELAPSED_TIME);
+        if (currentTime - lastShootTime >= shootInterval) {
             Projectile proj(xVal, 0.0, zVal, directionX, directionZ, 0.3);
             float enemyColor[3] = {0.0f, 0.5f, 0.5f}; // Red color for enemy projectiles
             proj.setColor(enemyColor);
             projectiles.push_back(proj);
-        } else {
-            Projectile proj(xVal, 0.0, zVal, directionX, directionZ, 0.2);
-            projectiles.push_back(proj);
+            lastShootTime = currentTime;
         }
-
-        lastShootTime = currentTime; // Update last shoot time
+    }else{
+        Projectile proj(xVal, 0.0, zVal, directionX, directionZ, 0.2);
+        proj.setStrength(power);
+        projectiles.push_back(proj);
     }
 }
 
 void Spacecraft::takeDamage(int damage) {
     health -= damage;
     if (health <= 0) {
+        health = 0;
         active = false;
         std::cout << "Spacecraft destroyed!" << std::endl;
         // Implement spacecraft destruction logic here
