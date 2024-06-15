@@ -413,11 +413,11 @@ void Game::draw() {
     spaceCraft->setEnemy(false);
     spaceCraft->setup();
 
-    glPushMatrix();
-    glTranslatef(spaceCraft->getX(), 0.0, spaceCraft->getZ());
-    glRotatef(spaceCraft->getAngle(), 0.0, 1.0, 0.0);
+//    glPushMatrix();
+//    glTranslatef(spaceCraft->getX(), 0.0, spaceCraft->getZ());
+//    glRotatef(spaceCraft->getAngle(), 0.0, 1.0, 0.0);
     spaceCraft->draw();
-    glPopMatrix();
+//    glPopMatrix();
 
     drawProjectiles();
 
