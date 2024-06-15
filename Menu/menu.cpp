@@ -127,7 +127,7 @@ void Menu::setup(void)
 void Menu::keyInput(unsigned char key, int x, int y)
 {
     if (key == 13) { // Enter key
-        if(selectedOption == 0){
+        if(selectedOption == 0 || selectedOption == 1){
             windowChoice = 1;
             game.setup();
             glutReshapeFunc(Game::resize);
